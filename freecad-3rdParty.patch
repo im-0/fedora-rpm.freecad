@@ -1,0 +1,10 @@
+diff -Naur freecad-0.12-svn5325.orig/src/CMakeLists.txt freecad-0.12-svn5325/src/CMakeLists.txt
+--- freecad-0.12-svn5325.orig/src/CMakeLists.txt	2011-03-03 09:57:25.000000000 -0600
++++ freecad-0.12-svn5325/src/CMakeLists.txt	2011-12-21 10:58:18.396896819 -0600
+@@ -1,6 +1,5 @@
+ 
+ add_subdirectory(Build)
+-add_subdirectory(3rdParty)
+ add_subdirectory(Base)
+ add_subdirectory(App)
+ add_subdirectory(Main)

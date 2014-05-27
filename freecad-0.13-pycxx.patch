@@ -1,0 +1,189 @@
+diff -Naur freecad-0.13.a057590.orig/CMakeLists.txt freecad-0.13.a057590/CMakeLists.txt
+--- freecad-0.13.a057590.orig/CMakeLists.txt	2013-01-12 08:10:36.000000000 -0600
++++ freecad-0.13.a057590/CMakeLists.txt	2013-01-17 16:04:52.117940071 -0600
+@@ -73,6 +73,13 @@
+ SET(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for header files")
+ SET(CMAKE_INSTALL_DOCDIR doc CACHE PATH "Output directory for documentation and license files")
+ 
++SET(PYCXX_INCLUDE_DIR
++    "${CMAKE_CURRENT_LIST_DIR}/src" CACHE PATH
++    "Path to the directory containing PyCXX's CXX/Config.hxx include file")
++SET(PYCXX_SOURCE_DIR
++    "${CMAKE_CURRENT_LIST_DIR}/src/CXX" CACHE PATH
++    "Path to the directory containing PyCXX's cxxextensions.c source file")
++
+ # used as compiler defines
+ SET(RESOURCEDIR "${CMAKE_INSTALL_DATADIR}")
+ SET(DOCDIR "${CMAKE_INSTALL_DOCDIR}")
+@@ -201,6 +208,10 @@
+ 
+     find_package(ZLIB REQUIRED)
+ 
++# -------------------------------- PyCXX --------------------------------
++
++    find_package(PyCXX REQUIRED)
++
+ # -------------------------------- OpenCasCade --------------------------------
+ 
+ #first, look for OpenCASCADE Community Edition (OCE)
+diff -Naur freecad-0.13.a057590.orig/src/Base/CMakeLists.txt freecad-0.13.a057590/src/Base/CMakeLists.txt
+--- freecad-0.13.a057590.orig/src/Base/CMakeLists.txt	2013-01-12 08:10:36.000000000 -0600
++++ freecad-0.13.a057590/src/Base/CMakeLists.txt	2013-01-17 16:06:36.985515701 -0600
+@@ -124,20 +124,6 @@
+ SOURCE_GROUP("zipios" FILES ${zipios_SRCS})
+ endif ()
+ 
+-SET(pycxx_SRCS
+-    ../CXX/Config.hxx
+-    ../CXX/cxxextensions.c
+-    ../CXX/cxx_extensions.cxx
+-    ../CXX/cxxsupport.cxx
+-    ../CXX/Exception.hxx
+-    ../CXX/Extensions.hxx
+-    ../CXX/IndirectPythonInterface.cxx
+-    ../CXX/IndirectPythonInterface.hxx
+-    ../CXX/Objects.hxx
+-    ../CXX/Version.hxx
+-    ../CXX/WrapPython.h
+-)
+-SOURCE_GROUP("pycxx" FILES ${pycxx_SRCS})
+ 
+ SET(FreeCADBase_XML_SRCS
+     AxisPy.xml
+@@ -279,7 +265,6 @@
+ )
+ 
+ SET(FreeCADBase_SRCS
+-    ${pycxx_SRCS}
+     ${FreeCADBase_CPP_SRCS}
+     ${FreeCADBase_HPP_SRCS}
+     ${FreeCADBase_XML_SRCS}
+@@ -310,6 +295,9 @@
+     list(APPEND FreeCADBase_SRCS ${zipios_SRCS})
+ endif(FREECAD_USE_EXTERNAL_ZIPIOS)
+ 
++include_directories(${PYCXX_INCLUDE_DIR})
++list(APPEND FreeCADBase_SRCS ${PYCXX_SOURCES})
++SOURCE_GROUP("pycxx" FILES ${PYCXX_SOURCES})
+ 
+ if(MSVC)
+ add_definitions(-D_PreComp_)
+This patch adds an option to FreeCAD's cmake to specify an external
+PyCXX.  PyCXX doesn't really have a standard location, so this will try
+to guess a couple of places, but best is to specify on the cmake command 
+line:
+
+cmake -DPYCXX_INCLUDE_DIR=/usr/include/python2.7 \
+   -DPYCXX_SOURCE_DIR=/usr/share/python2.7/CXX
+
+diff -ruN FreeCAD-0.12.5284.orig/cMake/FindPyCXX.cmake FreeCAD-0.12.5284/cMake/FindPyCXX.cmake
+--- FreeCAD-0.12.5284.orig/cMake/FindPyCXX.cmake	1969-12-31 18:00:00.000000000 -0600
++++ FreeCAD-0.12.5284/cMake/FindPyCXX.cmake	2012-06-25 01:30:25.000000000 -0500
+@@ -0,0 +1,107 @@
++# Locate PyCXX headers and source files
++
++# This module defines
++# PYCXX_INCLUDE_DIR
++# PYCXX_SOURCE_DIR
++# PYCXX_FOUND
++# PYCXX_SOURCES
++#
++# The PYCXX_*_DIR variables can be set to tell this module where
++# the files are.
++
++
++# There's no standard location for PyCXX.
++#
++# The authors' example is to put it in "~\" [sic].
++#
++# Ubuntu puts the includes into /usr/include/python2.7/CXX and sources into
++# /usr/share/python2.7/CXX.
++#
++# The Zultron Fedora RPM does the same as Ubuntu.
++
++set(PYCXX_FOUND "YES")
++
++# find the header directory
++if(PYCXX_INCLUDE_DIR)
++    # headers better be in there
++    if(NOT EXISTS "${PYCXX_INCLUDE_DIR}/CXX/Config.hxx")
++        if(PYCXX_FIND_REQUIRED)
++	    MESSAGE(FATAL_ERROR
++	        "PyCXX: could not find CXX/Config.hxx in PYCXX_INCLUDE_DIR "
++		"${PYCXX_INCLUDE_DIR}")
++        else(PYCXX_FIND_REQUIRED)
++            MESSAGE(WARNING
++	        "PyCXX: could not find CXX/Config.hxx in PYCXX_INCLUDE_DIR "
++		"${PYCXX_INCLUDE_DIR}")
++	    unset(PYCXX_FOUND)
++        endif(PYCXX_FIND_REQUIRED)
++    endif(NOT EXISTS "${PYCXX_INCLUDE_DIR}/CXX/Config.hxx")
++else(PYCXX_INCLUDE_DIR)
++    # check in 'standard' places
++    find_path(PYCXX_INCLUDE_DIR CXX/Config.hxx
++        ${PYTHON_INCLUDE_DIR}
++        "${CMAKE_CURRENT_LIST_DIR}/..")
++    if(NOT PYCXX_INCLUDE_DIR)
++        if(PYCXX_FIND_REQUIRED)
++	    MESSAGE(FATAL_ERROR
++	        "PyCXX not found; please set PYCXX_INCLUDE_DIR to "
++		"the location of CXX/Config.hxx")
++        else(PYCXX_FIND_REQUIRED)
++            MESSAGE(STATUS "PyCXX not found")
++	    unset(PYCXX_FOUND)
++        endif(PYCXX_FIND_REQUIRED)
++    endif(NOT PYCXX_INCLUDE_DIR)
++endif(PYCXX_INCLUDE_DIR)
++    
++# find the sources directory
++if(PYCXX_SOURCE_DIR)
++    # source directory specified, they'd better be there
++    if(NOT EXISTS "${PYCXX_SOURCE_DIR}/cxxextensions.c")
++        if(PYCXX_FIND_REQUIRED)
++	    MESSAGE(FATAL_ERROR
++	        "PyCXX: cxxextensions.c not found in PYCXX_INCLUDE_DIR "
++		"${PYCXX_INCLUDE_DIR}")
++        else(PYCXX_FIND_REQUIRED)
++            MESSAGE(WARNING
++	        "PyCXX: cxxextensions.c not found in PYCXX_INCLUDE_DIR "
++		"${PYCXX_INCLUDE_DIR}")
++	    unset(PYCXX_FOUND)
++        endif(PYCXX_FIND_REQUIRED)
++    endif(NOT EXISTS "${PYCXX_SOURCE_DIR}/cxxextensions.c")
++else(PYCXX_SOURCE_DIR)
++    # check in 'standard' places
++    find_path(PYCXX_SOURCE_DIR cxxextensions.c
++        "${PYCXX_INCLUDE_DIR}/CXX"
++        "${PYCXX_INCLUDE_DIR}/Src"
++        "${PYTHON_INCLUDE_DIR}/CXX"
++        "${PYTHON_INCLUDE_DIR}/Src"
++        "${CMAKE_CURRENT_LIST_DIR}/../Src"
++        "${CMAKE_CURRENT_LIST_DIR}/../CXX")
++    if(NOT PYCXX_SOURCE_DIR)
++        if(PYCXX_FIND_REQUIRED)
++	    MESSAGE(FATAL_ERROR
++	        "PyCXX not found; please set PYCXX_SOURCE_DIR to "
++		"the location of cxxextensions.c")
++        else(PYCXX_FIND_REQUIRED)
++            MESSAGE(STATUS "PyCXX not found")
++	    unset(PYCXX_FOUND)
++        endif(PYCXX_FIND_REQUIRED)
++    endif(NOT PYCXX_SOURCE_DIR)
++endif(PYCXX_SOURCE_DIR)
++
++# see what we've got
++if(PYCXX_FOUND)
++    MESSAGE(STATUS "PyCXX found:")
++    MESSAGE(STATUS "  Headers:  ${PYCXX_INCLUDE_DIR}")
++    MESSAGE(STATUS "  Sources:  ${PYCXX_SOURCE_DIR}")
++
++    # Build the list of sources for convenience
++    set(PYCXX_SOURCES
++	${PYCXX_SOURCE_DIR}/cxxextensions.c
++	${PYCXX_SOURCE_DIR}/cxx_extensions.cxx
++	${PYCXX_SOURCE_DIR}/cxxsupport.cxx
++	${PYCXX_SOURCE_DIR}/IndirectPythonInterface.cxx
++    )
++else(PYCXX_FOUND)
++    MESSAGE(STATUS "PyCXX not found")
++endif(PYCXX_FOUND)

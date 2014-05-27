@@ -1,0 +1,20 @@
+diff -Naur freecad-0.13.1830.orig/src/Mod/Part/App/TopoShapeSolidPyImp.cpp freecad-0.13.1830/src/Mod/Part/App/TopoShapeSolidPyImp.cpp
+--- freecad-0.13.1830.orig/src/Mod/Part/App/TopoShapeSolidPyImp.cpp	2013-02-02 11:09:17.000000000 -0600
++++ freecad-0.13.1830/src/Mod/Part/App/TopoShapeSolidPyImp.cpp	2013-09-23 09:33:05.009740932 -0500
+@@ -25,6 +25,7 @@
+ 
+ #include <BRepGProp.hxx>
+ #include <BRepTools.hxx>
++#include <BRepClass3d.hxx>
+ #include <GProp_GProps.hxx>
+ #include <GProp_PrincipalProps.hxx>
+ #include <BRepBuilderAPI_MakeSolid.hxx>
+@@ -178,7 +179,7 @@
+     TopoDS_Shell shell;
+     const TopoDS_Shape& shape = getTopoShapePtr()->_Shape;
+     if (!shape.IsNull() && shape.ShapeType() == TopAbs_SOLID)
+-        shell = BRepTools::OuterShell(TopoDS::Solid(shape));
++        shell = BRepClass3d::OuterShell(TopoDS::Solid(shape));
+     return Py::Object(new TopoShapeShellPy(new TopoShape(shell)),true);
+ }
+ 
