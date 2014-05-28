@@ -236,9 +236,8 @@ ln -sf %{name}.1.gz FreeCAD.1.gz
 ln -sf %{name}.1.gz FreeCADCmd.1.gz
 popd
 
-# Install QT Assistant documentation
-#mkdir -p %{buildroot}%{_docdir}/%{name}
-#install -pm 0644 build/doc/freecad.* %{buildroot}%{_docdir}/%{name}/
+# Remove obsolete Start_Page.html
+rm -f %{buildroot}%{_docdir}/%{name}/Start_Page.html
 
 # Bug maintainers to keep %%{plugins} macro up to date.
 #
