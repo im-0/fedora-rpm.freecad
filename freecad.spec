@@ -60,7 +60,7 @@ BuildRequires:  gettext
 BuildRequires:  dos2unix
 BuildRequires:  desktop-file-utils
 %ifnarch ppc64
- BuildRequires:  tbb-devel
+BuildRequires:  tbb-devel
 %endif
 # Development Libraries
 BuildRequires:  freeimage-devel
