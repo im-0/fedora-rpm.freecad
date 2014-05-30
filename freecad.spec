@@ -28,7 +28,7 @@
 
 Name:           freecad
 Version:        0.13
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -60,7 +60,7 @@ BuildRequires:  gettext
 BuildRequires:  dos2unix
 BuildRequires:  desktop-file-utils
 %ifnarch ppc64
-BuildRequires:  tbb-devel
+ BuildRequires:  tbb-devel
 %endif
 # Development Libraries
 BuildRequires:  freeimage-devel
@@ -171,7 +171,7 @@ rm -rf src/3rdParty
 rm -rf build && mkdir build && pushd build
 
 # Deal with cmake projects that tend to link excessively.
-LDFLAGS='-Wl,--as-needed'; export LDFLAGS
+LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
 
 %cmake -DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
        -DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
@@ -297,6 +297,9 @@ fi
 
 
 %changelog
+* Thu May 29 2014 Richard Shaw <hobbes1069@gmail.com> - 0.13-7
+- Update OCE patch with bad conditional which caused undefined symbols.
+
 * Fri May 23 2014 Richard Shaw <hobbes1069@gmail.com> - 0.13-6
 - Fix duplicate documentation.
 - Correct license tag to GPLv2+.

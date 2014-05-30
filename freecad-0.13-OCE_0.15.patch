@@ -1,14 +1,8 @@
-From c1d14eab3c3f9f1141dc0b7fca7cc4441431b50b Mon Sep 17 00:00:00 2001
-From: wmayer <wmayer@users.sourceforge.net>
-Date: Sat, 28 Dec 2013 12:22:31 +0100
-Subject: [PATCH] + Fix OCC 6.7 build failure
-
----
- .../Part/App/BRepOffsetAPI_MakePipeShellPyImp.cpp  | 32 ++++++++++++++++++++++
- 1 file changed, 32 insertions(+)
+ .../Part/App/BRepOffsetAPI_MakePipeShellPyImp.cpp  | 42 ++++++++++++++++++++--
+ 1 file changed, 40 insertions(+), 2 deletions(-)
 
 diff --git a/src/Mod/Part/App/BRepOffsetAPI_MakePipeShellPyImp.cpp b/src/Mod/Part/App/BRepOffsetAPI_MakePipeShellPyImp.cpp
-index 578f5be..bdc91c3 100644
+index 187bec3..bdc91c3 100644
 --- a/src/Mod/Part/App/BRepOffsetAPI_MakePipeShellPyImp.cpp
 +++ b/src/Mod/Part/App/BRepOffsetAPI_MakePipeShellPyImp.cpp
 @@ -29,6 +29,7 @@
@@ -56,14 +50,29 @@ index 578f5be..bdc91c3 100644
      PyObject *spine, *curv, *keep;
      if (!PyArg_ParseTuple(args, "O!O!O!",&Part::TopoShapePy::Type,&spine
                                          ,&PyBool_Type,&curv
-@@ -135,6 +166,7 @@
-     const TopoDS_Shape& s = static_cast<Part::TopoShapePy*>(prof)->getTopoShapePtr()->_Shape;
-     this->getBRepOffsetAPI_MakePipeShellPtr()->Add(s, PyObject_IsTrue(curv), PyObject_IsTrue(keep));
+@@ -121,8 +152,13 @@ PyObject* BRepOffsetAPI_MakePipeShellPy::setAuxiliarySpine(PyObject *args)
+         PyErr_SetString(PyExc_TypeError, "spine is not a wire");
+         return 0;
+     }
+-    this->getBRepOffsetAPI_MakePipeShellPtr()->SetMode(TopoDS::Wire(s), PyObject_IsTrue(curv), PyObject_IsTrue(keep));
++
++    this->getBRepOffsetAPI_MakePipeShellPtr()->SetMode(
++        TopoDS::Wire(s),
++        PyObject_IsTrue(curv) ? Standard_True : Standard_False,
++        PyObject_IsTrue(keep) ? Standard_True : Standard_False);
      Py_Return;
 +#endif
  }
-
- PyObject* BRepOffsetAPI_MakePipeShellPy::remove(PyObject *args)
--- 
-1.8.5.1
-
+ 
+ PyObject* BRepOffsetAPI_MakePipeShellPy::add(PyObject *args)
+@@ -133,7 +169,9 @@ PyObject* BRepOffsetAPI_MakePipeShellPy::add(PyObject *args)
+                                          ,&PyBool_Type,&keep))
+         return 0;
+     const TopoDS_Shape& s = static_cast<Part::TopoShapePy*>(prof)->getTopoShapePtr()->_Shape;
+-    this->getBRepOffsetAPI_MakePipeShellPtr()->Add(s, PyObject_IsTrue(curv), PyObject_IsTrue(keep));
++    this->getBRepOffsetAPI_MakePipeShellPtr()->Add(s,
++        PyObject_IsTrue(curv) ? Standard_True : Standard_False,
++        PyObject_IsTrue(keep) ? Standard_True : Standard_False);
+     Py_Return;
+ }
+ 
