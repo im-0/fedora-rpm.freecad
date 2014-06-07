@@ -28,7 +28,7 @@
 
 Name:           freecad
 Version:        0.13
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -297,6 +297,9 @@ fi
 
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.13-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Thu May 29 2014 Richard Shaw <hobbes1069@gmail.com> - 0.13-7
 - Update OCE patch with bad conditional which caused undefined symbols.
 
