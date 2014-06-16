@@ -101,7 +101,7 @@ BuildRequires:  python-matplotlib
 # here.
 Requires:       %{name}-data = %{version}-%{release}
 # Obsolete old doc package since it's required for functionality.
-Obsoletes:      %{name}-%{doc} < 0.13-5
+Obsoletes:      %{name}-doc < 0.13-5
 
 # Needed for plugin support and is not a soname dependency.
 Requires:       python-pivy
