@@ -28,7 +28,7 @@
 
 Name:           freecad
 Version:        0.13
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -104,7 +104,9 @@ Requires:       %{name}-data = %{version}-%{release}
 Obsoletes:      %{name}-doc < 0.13-5
 
 # Needed for plugin support and is not a soname dependency.
+%if ! 0%{?rhel} <= 6
 Requires:       python-pivy
+%endif
 Requires:       PyQt4
 Requires:       hicolor-icon-theme
 Requires:       python-matplotlib
