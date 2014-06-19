@@ -104,7 +104,8 @@ Requires:       %{name}-data = %{version}-%{release}
 Obsoletes:      %{name}-doc < 0.13-5
 
 # Needed for plugin support and is not a soname dependency.
-%if ! 0%{?rhel} <= 6
+%if 0%{?fedora} || 0%{?rhel} < 6 || "%{_arch}" != "ppc64"
+# python-pivy does not build on EPEL 6 ppc64.
 Requires:       python-pivy
 %endif
 Requires:       PyQt4
@@ -299,6 +300,11 @@ fi
 
 
 %changelog
+* Thu Jun 19 2014 Richard Shaw <hobbes1069@gmail.com> - 0.13-9
+- Fix obsoletes of old documentation subpackage.
+- Add conditional so EPEL 6 ppc64 does not require python-pivy which does not
+  build on that platform.
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.13-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
