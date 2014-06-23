@@ -28,7 +28,7 @@
 
 Name:           freecad
 Version:        0.13
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -112,6 +112,7 @@ Requires:       PyQt4
 Requires:       hicolor-icon-theme
 Requires:       python-matplotlib
 Requires:       python-collada
+Requires:       qt-assistant
 
 # plugins and private shared libs in %%{_libdir}/freecad/lib are private;
 # prevent private capabilities being advertised in Provides/Requires
@@ -300,6 +301,9 @@ fi
 
 
 %changelog
+* Mon Jun 23 2014 John Morris <john@zultron.com> - 0.13-10
+- Add Requires: qt-assistant for bz #1112045
+
 * Thu Jun 19 2014 Richard Shaw <hobbes1069@gmail.com> - 0.13-9
 - Fix obsoletes of old documentation subpackage.
 - Add conditional so EPEL 6 ppc64 does not require python-pivy which does not
