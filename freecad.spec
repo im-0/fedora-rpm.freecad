@@ -1,12 +1,12 @@
 # Maintainers:  keep this list of plugins up to date
 # List plugins in %%{_libdir}/freecad/lib, less '.so' and 'Gui.so', here
-%global plugins Assembly Complete Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part Points QtUnit Raytracing ReverseEngineering Robot Sketcher Start Web
+%global plugins Assembly Complete Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part Points QtUnit Raytracing ReverseEngineering Robot Sketcher Start Web PartDesignGui _PartDesign
 
 # Some plugins go in the Mod folder instead of lib. Deal with those here:
 %global mod_plugins Mod/PartDesign
 
 # This revision is 0.13 final.
-%global rev 1830
+%global rev 3702
 
 # Use updated cmake package on EL builds.
 # Temporary workaround for cmake/boost bug:
@@ -27,8 +27,8 @@
 
 
 Name:           freecad
-Version:        0.13
-Release:        10%{?dist}
+Version:        0.14
+Release:        1%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -39,13 +39,8 @@ Source101:      freecad.desktop
 Source102:      freecad.1
 
 Patch0:         freecad-3rdParty.patch
-Patch1:         freecad-0.13-pycxx.patch
-# Patch to build against OCE 0.13
-Patch2:         freecad-0.13-OCE_0.13.patch
-# Patch to build with non-backward compatible change in QT4.
-Patch3:         freecad-0.13-qt4_cmake.patch
-# Patch to build against OCE 0.15.
-Patch4:         freecad-0.13-OCE_0.15.patch
+Patch1:         freecad-0.14-Xlib_h.patch
+Patch2:         freecad-0.14-smesh.patch
 
 
 # Utilities
@@ -84,6 +79,8 @@ BuildRequires:  SoQt-devel
 #BuildRequires:  ode-devel
 BuildRequires:  xerces-c xerces-c-devel
 BuildRequires:  libspnav-devel
+BuildRequires:  shiboken-devel
+BuildRequires:  python-pyside-devel
 #BuildRequires:  opencv-devel
 %if ! %{bundled_smesh}
 BuildRequires:  smesh-devel
@@ -108,11 +105,10 @@ Obsoletes:      %{name}-doc < 0.13-5
 # python-pivy does not build on EPEL 6 ppc64.
 Requires:       python-pivy
 %endif
-Requires:       PyQt4
+#Requires:       PyQt4
 Requires:       hicolor-icon-theme
 Requires:       python-matplotlib
 Requires:       python-collada
-Requires:       qt-assistant
 
 # plugins and private shared libs in %%{_libdir}/freecad/lib are private;
 # prevent private capabilities being advertised in Provides/Requires
@@ -150,12 +146,10 @@ Data files for FreeCAD
 %patch0 -p1 -b .3rdparty
 # Remove bundled pycxx if we're not using it
 %if ! %{bundled_pycxx}
-%patch1 -p1 -b .pycxx
 rm -rf src/CXX
 %endif
-%patch2 -p1 -b .port_oce
-%patch3 -p1 -b .qt4_moc
-%patch4 -p1 -b .oce_015
+%patch1 -p1 -b .Xlib_h
+%patch2 -p1 -b .smesh
 
 %if ! %{bundled_zipios}
 rm -rf src/zipios++
@@ -177,11 +171,13 @@ rm -rf build && mkdir build && pushd build
 # Deal with cmake projects that tend to link excessively.
 LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
 
+#       -DCMAKE_INSTALL_LIBDIR=%{_libdir}/%{name} \
+
 %cmake -DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
        -DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
        -DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
        -DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
-       -DRESOURCEDIR=%{_libdir}/freecad \
+       -DRESOURCEDIR=%{_datadir}/%{name} \
        -DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin2 \
        -DCOIN3D_DOC_PATH=%{_datadir}/Coin2/Coin \
        -DFREECAD_USE_EXTERNAL_PIVY=TRUE \
@@ -301,6 +297,9 @@ fi
 
 
 %changelog
+* Wed Jul 16 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-1
+- Update to latest upstream release.
+
 * Mon Jun 23 2014 John Morris <john@zultron.com> - 0.13-10
 - Add Requires: qt-assistant for bz #1112045
 

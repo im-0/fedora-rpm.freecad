@@ -1,0 +1,51 @@
+diff -Naur freecad-0.14.3702.orig/CMakeLists.txt freecad-0.14.3702/CMakeLists.txt
+--- freecad-0.14.3702.orig/CMakeLists.txt	2014-07-13 10:33:02.000000000 -0500
++++ freecad-0.14.3702/CMakeLists.txt	2014-07-23 21:39:15.154360396 -0500
+@@ -474,7 +474,8 @@
+     # Salome SMESH sources are under src/3rdParty now
+     IF(OCC_FOUND)
+     set(SMESH_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/src/3rdParty/salomesmesh/inc)
+-    set(SMESH_LIBRARIES
++    set(SMESH_LIBRARIES "")
++    foreach(SMESH_LIB
+         StdMeshers
+         #MEFISTO2
+         SMESH
+@@ -485,6 +486,11 @@
+         Driver
+         SMDS
+     )
++        find_library(SMESH_${SMESH_LIB} ${SMESH_LIB} REQUIRED)
++        list(APPEND SMESH_LIBRARIES ${SMESH_${SMESH_LIB}})
++    endforeach()
++    message(STATUS "Found SMESH library: ${SMESH_LIBRARIES}")
++
+     set(SMESH_FOUND TRUE)
+     ENDIF(OCC_FOUND)
+     #find_package(SMESH)
+diff -Naur freecad-0.14.3702.orig/src/Mod/Fem/App/CMakeLists.txt freecad-0.14.3702/src/Mod/Fem/App/CMakeLists.txt
+--- freecad-0.14.3702.orig/src/Mod/Fem/App/CMakeLists.txt	2014-07-13 10:33:02.000000000 -0500
++++ freecad-0.14.3702/src/Mod/Fem/App/CMakeLists.txt	2014-07-23 22:01:35.824497167 -0500
+@@ -39,8 +39,7 @@
+     set(Fem_LIBS
+         Part
+         FreeCADApp
+-        StdMeshers
+-        SMESH
++        ${SMESH_LIBRARIES}
+     )
+ endif(FREECAD_BUILD_FEM_NETGEN)
+ 
+diff -Naur freecad-0.14.3702.orig/src/Mod/MeshPart/App/CMakeLists.txt freecad-0.14.3702/src/Mod/MeshPart/App/CMakeLists.txt
+--- freecad-0.14.3702.orig/src/Mod/MeshPart/App/CMakeLists.txt	2014-07-13 10:33:02.000000000 -0500
++++ freecad-0.14.3702/src/Mod/MeshPart/App/CMakeLists.txt	2014-07-23 21:47:06.558048433 -0500
+@@ -39,8 +39,7 @@
+     set(MeshPart_LIBS
+         Part
+         Mesh
+-        StdMeshers
+-        SMESH
++        ${SMESH_LIBRARIES}
+     )
+ endif(FREECAD_BUILD_FEM_NETGEN)
+ 
