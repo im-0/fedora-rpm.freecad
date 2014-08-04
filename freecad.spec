@@ -28,7 +28,7 @@
 
 Name:           freecad
 Version:        0.14
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -109,6 +109,7 @@ Requires:       python-pivy
 Requires:       hicolor-icon-theme
 Requires:       python-matplotlib
 Requires:       python-collada
+Requires:       python-pyside
 
 # plugins and private shared libs in %%{_libdir}/freecad/lib are private;
 # prevent private capabilities being advertised in Provides/Requires
@@ -297,6 +298,10 @@ fi
 
 
 %changelog
+* Mon Aug  8 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-2
+- Add python-pyside as requirement as it is not currently being pulled in as a
+  automatic dependency by rpmbuild.
+
 * Wed Jul 16 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-1
 - Update to latest upstream release.
 
