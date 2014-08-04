@@ -298,7 +298,7 @@ fi
 
 
 %changelog
-* Mon Aug  8 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-2
+* Mon Aug  4 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-2
 - Add python-pyside as requirement as it is not currently being pulled in as a
   automatic dependency by rpmbuild.
 
