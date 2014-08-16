@@ -28,7 +28,7 @@
 
 Name:           freecad
 Version:        0.14
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -298,6 +298,9 @@ fi
 
 
 %changelog
+* Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.14-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
 * Mon Aug  4 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-2
 - Add python-pyside as requirement as it is not currently being pulled in as a
   automatic dependency by rpmbuild.
