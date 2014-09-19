@@ -28,7 +28,7 @@
 
 Name:           freecad
 Version:        0.14
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -38,9 +38,12 @@ Source0:        http://downloads.sourceforge.net/free-cad/%{name}-%{version}.%{r
 Source101:      freecad.desktop
 Source102:      freecad.1
 
-Patch0:         freecad-3rdParty.patch
-Patch1:         freecad-0.14-Xlib_h.patch
-Patch2:         freecad-0.14-smesh.patch
+Patch0:         freecad-0.14-fixes.patch
+Patch1:         freecad-3rdParty.patch
+Patch2:         freecad-0.14-Xlib_h.patch
+Patch3:         freecad-0.14-smesh.patch
+# http://www.freecadweb.org/tracker/view.php?id=1757
+Patch4:         freecad-0.14-DraftSnap.patch
 
 
 # Utilities
@@ -105,7 +108,6 @@ Obsoletes:      %{name}-doc < 0.13-5
 # python-pivy does not build on EPEL 6 ppc64.
 Requires:       python-pivy
 %endif
-#Requires:       PyQt4
 Requires:       hicolor-icon-theme
 Requires:       python-matplotlib
 Requires:       python-collada
@@ -144,13 +146,15 @@ Data files for FreeCAD
 
 %prep
 %setup -q -n freecad-%{version}.%{rev}
-%patch0 -p1 -b .3rdparty
+#patch0 -p1
+%patch1 -p1 -b .3rdparty
 # Remove bundled pycxx if we're not using it
 %if ! %{bundled_pycxx}
 rm -rf src/CXX
 %endif
-%patch1 -p1 -b .Xlib_h
-%patch2 -p1 -b .smesh
+%patch2 -p1 -b .Xlib_h
+%patch3 -p1 -b .smesh
+%patch4 -p1 -b .draftsnap
 
 %if ! %{bundled_zipios}
 rm -rf src/zipios++
@@ -298,10 +302,13 @@ fi
 
 
 %changelog
+* Thu Sep 18 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-3
+- Patch PythonSnap, fixes BZ#1143814.
+
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.14-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
-* Mon Aug  4 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-2
+* Mon Aug  8 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-2
 - Add python-pyside as requirement as it is not currently being pulled in as a
   automatic dependency by rpmbuild.
 
