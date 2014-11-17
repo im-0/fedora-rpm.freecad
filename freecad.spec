@@ -8,11 +8,10 @@
 # This revision is 0.13 final.
 %global rev 3702
 
-# Use updated cmake package on EL builds.
 # Temporary workaround for cmake/boost bug:
 # http://public.kitware.com/Bug/view.php?id=13446
 %if 0%{?rhel} && 0%{?rhel} <= 6
-%global cmake %cmake28 -DBoost_NO_BOOST_CMAKE=ON
+%global cmake %cmake -DBoost_NO_BOOST_CMAKE=ON
 %endif
 
 # Some configuration options for other environments
@@ -38,7 +37,6 @@ Source0:        http://downloads.sourceforge.net/free-cad/%{name}-%{version}.%{r
 Source101:      freecad.desktop
 Source102:      freecad.1
 
-Patch0:         freecad-0.14-fixes.patch
 Patch1:         freecad-3rdParty.patch
 Patch2:         freecad-0.14-Xlib_h.patch
 Patch3:         freecad-0.14-smesh.patch
@@ -47,11 +45,7 @@ Patch4:         freecad-0.14-DraftSnap.patch
 
 
 # Utilities
-%if 0%{?rhel} && 0%{?rhel} <= 6
-BuildRequires:  cmake28
-%else
 BuildRequires:  cmake
-%endif
 BuildRequires:  doxygen swig graphviz
 BuildRequires:  gcc-gfortran
 BuildRequires:  gettext
@@ -308,7 +302,7 @@ fi
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.14-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
-* Mon Aug  8 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-2
+* Mon Aug  4 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-2
 - Add python-pyside as requirement as it is not currently being pulled in as a
   automatic dependency by rpmbuild.
 
