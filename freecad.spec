@@ -27,7 +27,7 @@
 
 Name:           freecad
 Version:        0.14
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -36,12 +36,15 @@ URL:            http://sourceforge.net/apps/mediawiki/free-cad/
 Source0:        http://downloads.sourceforge.net/free-cad/%{name}-%{version}.%{rev}.tar.gz
 Source101:      freecad.desktop
 Source102:      freecad.1
+Source103:      freecad.appdata.xml
+Source104:      freecad.sharedmimeinfo
 
-Patch1:         freecad-3rdParty.patch
-Patch2:         freecad-0.14-Xlib_h.patch
-Patch3:         freecad-0.14-smesh.patch
+Patch0:         freecad-3rdParty.patch
+Patch1:         freecad-0.14-Xlib_h.patch
+Patch2:         freecad-0.14-smesh.patch
 # http://www.freecadweb.org/tracker/view.php?id=1757
-Patch4:         freecad-0.14-DraftSnap.patch
+Patch3:         freecad-0.14-DraftSnap.patch
+#Patch4:         freecad-0.14-disable_auto_dxf_dl.patch
 
 
 # Utilities
@@ -82,6 +85,7 @@ BuildRequires:  python-pyside-devel
 %if ! %{bundled_smesh}
 BuildRequires:  smesh-devel
 %endif
+BuildRequires:  netgen-mesher-devel
 %if ! %{bundled_zipios}
 BuildRequires:  zipios++-devel
 %endif
@@ -91,6 +95,11 @@ BuildRequires:  python-pycxx-devel
 BuildRequires:  libicu-devel
 BuildRequires:  python-matplotlib
 
+# For appdata
+%if 0%{?fedora}
+BuildRequires:  libappstream-glib
+%endif
+
 # Packages separated because they are noarch, but not optional so require them
 # here.
 Requires:       %{name}-data = %{version}-%{release}
@@ -98,7 +107,7 @@ Requires:       %{name}-data = %{version}-%{release}
 Obsoletes:      %{name}-doc < 0.13-5
 
 # Needed for plugin support and is not a soname dependency.
-%if 0%{?fedora} || 0%{?rhel} < 6 || "%{_arch}" != "ppc64"
+%if ! 0%{?rhel} <= 6 && "%{_arch}" != "ppc64"
 # python-pivy does not build on EPEL 6 ppc64.
 Requires:       python-pivy
 %endif
@@ -140,15 +149,16 @@ Data files for FreeCAD
 
 %prep
 %setup -q -n freecad-%{version}.%{rev}
-#patch0 -p1
-%patch1 -p1 -b .3rdparty
+%patch0 -p1 -b .3rdparty
 # Remove bundled pycxx if we're not using it
 %if ! %{bundled_pycxx}
 rm -rf src/CXX
 %endif
-%patch2 -p1 -b .Xlib_h
-%patch3 -p1 -b .smesh
-%patch4 -p1 -b .draftsnap
+%patch1 -p1 -b .Xlib_h
+%patch2 -p1 -b .smesh
+%patch3 -p1 -b .draftsnap
+# Patch comes from upstream/master, doesn't apply cleanly to 0.14.
+#patch4 -p1 -b .no_dxf_dl
 
 %if ! %{bundled_zipios}
 rm -rf src/zipios++
@@ -170,8 +180,6 @@ rm -rf build && mkdir build && pushd build
 # Deal with cmake projects that tend to link excessively.
 LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
 
-#       -DCMAKE_INSTALL_LIBDIR=%{_libdir}/%{name} \
-
 %cmake -DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
        -DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
        -DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
@@ -184,7 +192,8 @@ LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
        -DUSE_OCC=TRUE \
 %endif
 %if ! %{bundled_smesh}
-       -DSMESH_INCLUDE_DIR=%{_includedir} \
+       -DFREECAD_USE_EXTERNAL_SMESH=TRUE \
+       -DSMESH_INCLUDE_DIR=%{_includedir}/smesh \
 %endif
 %if ! %{bundled_zipios}
        -DFREECAD_USE_EXTERNAL_ZIPIOS=TRUE \
@@ -238,6 +247,14 @@ popd
 # Remove obsolete Start_Page.html
 rm -f %{buildroot}%{_docdir}/%{name}/Start_Page.html
 
+# Install MimeType file
+mkdir -p %{buildroot}%{_datadir}/mime/packages
+install -pm 0644 %{SOURCE104} %{buildroot}%{_datadir}/mime/packages/%{name}.xml
+
+# Install appdata file
+mkdir -p %{buildroot}%{_datadir}/appdata
+install -pm 0644 %{SOURCE103} %{buildroot}%{_datadir}/appdata/
+
 # Bug maintainers to keep %%{plugins} macro up to date.
 #
 # Make sure there are no plugins that need to be added to plugins macro
@@ -263,9 +280,16 @@ for p in %{plugins}; do
 done
 
 
+
+%check
+%{?fedora:appstream-util validate-relax --nonet \
+    %{buildroot}/%{_datadir}/appdata/*.appdata.xml}
+
+
 %post
 /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
 /usr/bin/update-desktop-database &> /dev/null || :
+/usr/bin/update-mime-database %{_datadir}/mime &> /dev/null || :
 
 %postun
 if [ $1 -eq 0 ] ; then
@@ -273,6 +297,7 @@ if [ $1 -eq 0 ] ; then
     /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 fi
 /usr/bin/update-desktop-database &> /dev/null || :
+/usr/bin/update-mime-database %{_datadir}/mime &> /dev/null || :
 
 %posttrans
 /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
@@ -282,8 +307,10 @@ fi
 %doc ChangeLog.txt copying.lib data/License.txt
 %exclude %{_docdir}/freecad/freecad.*
 %{_bindir}/*
+%{_datadir}/appdata/*.appdata.xml
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
+%{_datadir}/mime/packages/%{name}.xml
 %dir %{_libdir}/%{name}
 %{_libdir}/%{name}/bin/
 %{_libdir}/%{name}/lib/
@@ -296,7 +323,10 @@ fi
 
 
 %changelog
-* Thu Sep 18 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-3
+* Tue Jan  6 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-5
+- Fix bug introduced by PythonSnap patch, fixes BZ#1178672.
+
+* Thu Sep 18 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-4
 - Patch PythonSnap, fixes BZ#1143814.
 
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.14-3
