@@ -44,7 +44,7 @@ Patch1:         freecad-0.14-Xlib_h.patch
 Patch2:         freecad-0.14-smesh.patch
 # http://www.freecadweb.org/tracker/view.php?id=1757
 Patch3:         freecad-0.14-DraftSnap.patch
-#Patch4:         freecad-0.14-disable_auto_dxf_dl.patch
+Patch4:         freecad-0.14-disable_auto_dxf_dl.patch
 
 
 # Utilities
@@ -323,7 +323,7 @@ fi
 
 
 %changelog
-* Tue Jan  6 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-5
+* Tue Jan  6 2015 Richard Shaw <hobbes1069@gmail.com> - 0.14-5
 - Fix bug introduced by PythonSnap patch, fixes BZ#1178672.
 
 * Thu Sep 18 2014 Richard Shaw <hobbes1069@gmail.com> - 0.14-4
