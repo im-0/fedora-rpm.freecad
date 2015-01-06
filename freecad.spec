@@ -44,7 +44,7 @@ Patch1:         freecad-0.14-Xlib_h.patch
 Patch2:         freecad-0.14-smesh.patch
 # http://www.freecadweb.org/tracker/view.php?id=1757
 Patch3:         freecad-0.14-DraftSnap.patch
-Patch4:         freecad-0.14-disable_auto_dxf_dl.patch
+#Patch4:         freecad-0.14-disable_auto_dxf_dl.patch
 
 
 # Utilities
