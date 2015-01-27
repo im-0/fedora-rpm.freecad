@@ -27,7 +27,7 @@
 
 Name:           freecad
 Version:        0.14
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -323,6 +323,9 @@ fi
 
 
 %changelog
+* Tue Jan 27 2015 Petr Machata <pmachata@redhat.com> - 0.14-6
+- Rebuild for boost 1.57.0
+
 * Tue Jan  6 2015 Richard Shaw <hobbes1069@gmail.com> - 0.14-5
 - Fix bug introduced by PythonSnap patch, fixes BZ#1178672.
 
