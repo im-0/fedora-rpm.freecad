@@ -1,12 +1,14 @@
+%{!?_licensedir:%global license %%doc}
+
 # Maintainers:  keep this list of plugins up to date
 # List plugins in %%{_libdir}/freecad/lib, less '.so' and 'Gui.so', here
-%global plugins Assembly Complete Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part Points QtUnit Raytracing ReverseEngineering Robot Sketcher Start Web PartDesignGui _PartDesign
+%global plugins Complete Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part Points QtUnit Raytracing ReverseEngineering Robot Sketcher Start Web PartDesignGui _PartDesign Spreadsheet SpreadsheetGui
 
 # Some plugins go in the Mod folder instead of lib. Deal with those here:
 %global mod_plugins Mod/PartDesign
 
-# This revision is 0.13 final.
-%global rev 3702
+# This revision is 0.15 final.
+%global rev 4671
 
 # Temporary workaround for cmake/boost bug:
 # http://public.kitware.com/Bug/view.php?id=13446
@@ -26,14 +28,14 @@
 
 
 Name:           freecad
-Version:        0.14
-Release:        6%{?dist}
+Version:        0.15
+Release:        1%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
 License:        GPLv2+
 URL:            http://sourceforge.net/apps/mediawiki/free-cad/
-Source0:        http://downloads.sourceforge.net/free-cad/%{name}-%{version}.%{rev}.tar.gz
+Source0:        http://downloads.sourceforge.net/free-cad/%{name}_%{version}%{?rev:.%{rev}}.tar.gz
 Source101:      freecad.desktop
 Source102:      freecad.1
 Source103:      freecad.appdata.xml
@@ -41,11 +43,7 @@ Source104:      freecad.sharedmimeinfo
 
 Patch0:         freecad-3rdParty.patch
 Patch1:         freecad-0.14-Xlib_h.patch
-Patch2:         freecad-0.14-smesh.patch
-# http://www.freecadweb.org/tracker/view.php?id=1757
-Patch3:         freecad-0.14-DraftSnap.patch
-#Patch4:         freecad-0.14-disable_auto_dxf_dl.patch
-
+Patch2:         freecad-0.15-zipios.patch
 
 # Utilities
 BuildRequires:  cmake
@@ -65,11 +63,10 @@ BuildRequires:  mesa-libGLU-devel
 BuildRequires:  OpenCASCADE-devel
 %else
 BuildRequires:  OCE-devel
+# Temporary fix for OCE-devel not pulling in draw package
+BuildRequires:  OCE-draw
 %endif
-# Not yet in Fedora
-# https://bugzilla.redhat.com/show_bug.cgi?id=665733
-#BuildRequires:  Coin3-devel
-BuildRequires:  Coin2-devel
+BuildRequires:  Coin3-devel
 BuildRequires:  python2-devel
 BuildRequires:  boost-devel
 BuildRequires:  eigen3-devel
@@ -80,7 +77,7 @@ BuildRequires:  SoQt-devel
 BuildRequires:  xerces-c xerces-c-devel
 BuildRequires:  libspnav-devel
 BuildRequires:  shiboken-devel
-BuildRequires:  python-pyside-devel
+BuildRequires:  python-pyside-devel pyside-tools
 #BuildRequires:  opencv-devel
 %if ! %{bundled_smesh}
 BuildRequires:  smesh-devel
@@ -148,20 +145,19 @@ Data files for FreeCAD
 
 
 %prep
-%setup -q -n freecad-%{version}.%{rev}
+%setup -q -n freecad-%{version}%{?rev:.%{rev}}
 %patch0 -p1 -b .3rdparty
 # Remove bundled pycxx if we're not using it
 %if ! %{bundled_pycxx}
 rm -rf src/CXX
 %endif
 %patch1 -p1 -b .Xlib_h
-%patch2 -p1 -b .smesh
-%patch3 -p1 -b .draftsnap
-# Patch comes from upstream/master, doesn't apply cleanly to 0.14.
-#patch4 -p1 -b .no_dxf_dl
+%patch2 -p1 -b .zipios
 
 %if ! %{bundled_zipios}
 rm -rf src/zipios++
+#sed -i "s/zipios-config.h/zipios-config.hpp/g" \
+#    src/Base/Reader.cpp src/Base/Writer.h
 %endif
 
 # Fix encodings
@@ -185,8 +181,8 @@ LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
        -DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
        -DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
        -DRESOURCEDIR=%{_datadir}/%{name} \
-       -DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin2 \
-       -DCOIN3D_DOC_PATH=%{_datadir}/Coin2/Coin \
+       -DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin3 \
+       -DCOIN3D_DOC_PATH=%{_datadir}/Coin3/Coin \
        -DFREECAD_USE_EXTERNAL_PIVY=TRUE \
 %if %{occ}
        -DUSE_OCC=TRUE \
@@ -304,7 +300,8 @@ fi
 
 
 %files
-%doc ChangeLog.txt copying.lib data/License.txt
+%license copying.lib data/License.txt
+%doc ChangeLog.txt README
 %exclude %{_docdir}/freecad/freecad.*
 %{_bindir}/*
 %{_datadir}/appdata/*.appdata.xml
@@ -323,6 +320,9 @@ fi
 
 
 %changelog
+* Fri Apr 10 2015 Richard Shaw <hobbes1069@gmail.com> - 0.15-1
+- Update to latest upstream release.
+
 * Tue Jan 27 2015 Petr Machata <pmachata@redhat.com> - 0.14-6
 - Rebuild for boost 1.57.0
 
