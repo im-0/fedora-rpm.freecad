@@ -1,0 +1,17 @@
+diff -Naur freecad-0.15.4671.orig/src/Base/CMakeLists.txt freecad-0.15.4671/src/Base/CMakeLists.txt
+--- freecad-0.15.4671.orig/src/Base/CMakeLists.txt	2015-04-05 12:25:02.000000000 -0500
++++ freecad-0.15.4671/src/Base/CMakeLists.txt	2015-04-11 07:19:09.729155453 -0500
+@@ -301,9 +301,11 @@
+ # Use external zipios++ if specified.
+ if(FREECAD_USE_EXTERNAL_ZIPIOS)
+     find_library(ZIPIOS_LIBRARY zipios)
+-    find_path(ZIPIOS_INCLUDES zipios++/zipios-config.h)
++    find_path(ZIPIOS_INCLUDES NAMES
++        zipios++/zipios-config.h
++        zipios++/zipios-config.hpp)
+     if(ZIPIOS_LIBRARY)
+-        message(STATUS "Found zipios++: ${ZIPIOS}")
++        message(STATUS "Found zipios++: ${ZIPIOS_LIBRARY}")
+     endif()
+     if(ZIPIOS_INCLUDES)
+         message(STATUS "Found zipios++ headers.")
