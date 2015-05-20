@@ -30,7 +30,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.15
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -100,7 +100,7 @@ BuildRequires:  libappstream-glib
 
 # Packages separated because they are noarch, but not optional so require them
 # here.
-Requires:       %{name}-data = %{version}-%{release}
+Requires:       %{name}-data = %{epoch}:%{version}-%{release}
 # Obsolete old doc package since it's required for functionality.
 Obsoletes:      %{name}-doc < 0.13-5
 
@@ -321,7 +321,7 @@ fi
 
 
 %changelog
-* Tue May 19 2015 Richard Shaw <hobbes1069@gmail.com> - 1:0.15-2
+* Tue May 19 2015 Richard Shaw <hobbes1069@gmail.com> - 1:0.15-3
 - Bump Epoch to downgrade to 0.14 for Fedora 21 and below due to Coin2/Coin3
   library mismatch between Freecad & python-pivy (BZ#1221713).
 
