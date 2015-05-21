@@ -30,7 +30,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.15
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -139,7 +139,7 @@ modifying the core system.
 %package data
 Summary:        Data files for FreeCAD
 BuildArch:      noarch
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name} = %{epoch}:%{version}-%{release}
 
 %description data
 Data files for FreeCAD
@@ -321,7 +321,7 @@ fi
 
 
 %changelog
-* Tue May 19 2015 Richard Shaw <hobbes1069@gmail.com> - 1:0.15-3
+* Tue May 19 2015 Richard Shaw <hobbes1069@gmail.com> - 1:0.15-4
 - Bump Epoch to downgrade to 0.14 for Fedora 21 and below due to Coin2/Coin3
   library mismatch between Freecad & python-pivy (BZ#1221713).
 
