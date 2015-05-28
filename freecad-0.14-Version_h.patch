@@ -1,0 +1,13 @@
+diff -Naur freecad-0.14.3702.orig/src/CMakeLists.txt freecad-0.14.3702/src/CMakeLists.txt
+--- freecad-0.14.3702.orig/src/CMakeLists.txt	2015-05-28 11:24:13.393935311 -0500
++++ freecad-0.14.3702/src/CMakeLists.txt	2015-05-28 11:24:03.937354886 -0500
+@@ -1,5 +1,7 @@
+-
+-add_subdirectory(Build)
++# Do not generate a new Version.h if the source is a release tarball.
++if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Build/Version.h)
++    add_subdirectory(Build)
++endif()
+ add_subdirectory(Base)
+ add_subdirectory(App)
+ add_subdirectory(Main)

@@ -30,7 +30,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.15
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -45,6 +45,7 @@ Source104:      freecad.sharedmimeinfo
 Patch0:         freecad-3rdParty.patch
 Patch1:         freecad-0.14-Xlib_h.patch
 Patch2:         freecad-0.15-zipios.patch
+Patch3:         freecad-0.14-Version_h.patch
 
 # Utilities
 BuildRequires:  cmake
@@ -154,6 +155,7 @@ rm -rf src/CXX
 %endif
 %patch1 -p1 -b .Xlib_h
 %patch2 -p1 -b .zipios
+%patch3 -p1
 
 %if ! %{bundled_zipios}
 rm -rf src/zipios++
@@ -202,8 +204,6 @@ LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
        ../
 
 make %{?_smp_mflags}
-
-make doc
 
 
 %install
@@ -321,6 +321,9 @@ fi
 
 
 %changelog
+* Thu May 28 2015 Richard Shaw <hobbes1069@gmail.com> - 0.15-5
+- Fix version reporting in the About dialog (BZ#1192841).
+
 * Tue May 19 2015 Richard Shaw <hobbes1069@gmail.com> - 1:0.15-4
 - Bump Epoch to downgrade to 0.14 for Fedora 21 and below due to Coin2/Coin3
   library mismatch between Freecad & python-pivy (BZ#1221713).
