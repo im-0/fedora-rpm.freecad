@@ -30,7 +30,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.15
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -321,6 +321,9 @@ fi
 
 
 %changelog
+* Wed Jul 22 2015 David Tardon <dtardon@redhat.com> - 1:0.15-7
+- rebuild for Boost 1.58
+
 * Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:0.15-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
