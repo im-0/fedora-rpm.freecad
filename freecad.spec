@@ -1,5 +1,3 @@
-%{!?_licensedir:%global license %%doc}
-
 # Maintainers:  keep this list of plugins up to date
 # List plugins in %%{_libdir}/freecad/lib, less '.so' and 'Gui.so', here
 %global plugins Complete Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part Points QtUnit Raytracing ReverseEngineering Robot Sketcher Start Web PartDesignGui _PartDesign Spreadsheet SpreadsheetGui
@@ -10,11 +8,6 @@
 # This revision is 0.15 final.
 %global rev 4671
 
-# Temporary workaround for cmake/boost bug:
-# http://public.kitware.com/Bug/view.php?id=13446
-%if 0%{?rhel} && 0%{?rhel} <= 6
-%global cmake %cmake -DBoost_NO_BOOST_CMAKE=ON
-%endif
 
 # Some configuration options for other environments
 # rpmbuild --with=occ:  Compile using OpenCASCADE instead of OCE
@@ -35,7 +28,7 @@ Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
 License:        GPLv2+
-URL:            http://sourceforge.net/apps/mediawiki/free-cad/
+URL:            http://freecadweb.org/
 Source0:        http://downloads.sourceforge.net/free-cad/%{name}_%{version}%{?rev:.%{rev}}.tar.gz
 Source101:      freecad.desktop
 Source102:      freecad.1
@@ -201,8 +194,13 @@ LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
        -DPYCXX_INCLUDE_DIR=$(pkg-config --variable=includedir PyCXX) \
        -DPYCXX_SOURCE_DIR=$(pkg-config --variable=srcdir PyCXX) \
 %endif
-       ../
+%if 0%{?rhel} <= 6
+# Temporary workaround for cmake/boost bug: \
+# http://public.kitware.com/Bug/view.php?id=13446 \
+       -DBoost_NO_BOOST_CMAKE=ON \
+%endif
 
+       ../
 make %{?_smp_mflags}
 
 
@@ -301,6 +299,7 @@ fi
 
 
 %files
+%{!?_licensedir:%global license %doc}
 %license copying.lib data/License.txt
 %doc ChangeLog.txt README
 %exclude %{_docdir}/freecad/freecad.*
@@ -324,7 +323,7 @@ fi
 * Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:0.15-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
-* Thu May 28 2015 Richard Shaw <hobbes1069@gmail.com> - 0.15-5
+* Thu May 28 2015 Richard Shaw <hobbes1069@gmail.com> - 1:0.15-5
 - Fix version reporting in the About dialog (BZ#1192841).
 
 * Tue May 19 2015 Richard Shaw <hobbes1069@gmail.com> - 1:0.15-4
