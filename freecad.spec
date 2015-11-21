@@ -63,7 +63,7 @@ BuildRequires:  OCE-draw
 %endif
 BuildRequires:  Coin3-devel
 BuildRequires:  python2-devel
-if 0%{?rhel} && 0%{?rhel} < 7
+%if 0%{?rhel} && 0%{?rhel} < 7
 BuildRequires:  boost148-devel
 %else
 BuildRequires:  boost-devel
