@@ -63,7 +63,7 @@ BuildRequires:  OCE-draw
 %endif
 BuildRequires:  Coin3-devel
 BuildRequires:  python2-devel
-%if 0%{?rhel} && 0%{?rhel} < 7
+%if 0%{?rhel} == 6
 BuildRequires:  boost148-devel
 %else
 BuildRequires:  boost-devel
@@ -169,6 +169,11 @@ dos2unix -k src/Mod/Test/unittestgui.py \
 # Removed bundled libraries
 rm -rf src/3rdParty
 
+# Fix python suffix on epel 6
+%if 0%{?rhel} == 6
+sed -i "s|-python2.7|-python2.6|g" CMakeLists.txt
+%endif
+
 
 %build
 rm -rf build && mkdir build && pushd build
@@ -198,13 +203,13 @@ LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
        -DPYCXX_INCLUDE_DIR=$(pkg-config --variable=includedir PyCXX) \
        -DPYCXX_SOURCE_DIR=$(pkg-config --variable=srcdir PyCXX) \
 %endif
-%if 0%{?rhel} <= 6
-# Temporary workaround for cmake/boost bug: \
-# http://public.kitware.com/Bug/view.php?id=13446 \
-       -DBoost_NO_BOOST_CMAKE=ON \
+%if 0%{?rhel} == 6
+       -DBOOST_INCLUDEDIR=%{_includedir}/boost148 \
+       -DBOOST_LIBRARYDIR=%{_libdir}/boost148 \
+       -DCMAKE_INSTALL_LIBDIR=%{_libdir}/freecad/lib \
 %endif
-
        ../
+
 make %{?_smp_mflags}
 
 
