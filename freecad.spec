@@ -23,7 +23,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.15
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -329,6 +329,9 @@ fi
 
 
 %changelog
+* Mon Jan  4 2016 Richard Shaw <hobbes1069@gmail.com> - 1:0.15-10
+- Fix appdata license, fixes BZ#1294623.
+
 * Thu Aug 27 2015 Jonathan Wakely <jwakely@redhat.com> - 1:0.15-9
 - Rebuilt for Boost 1.59
 
