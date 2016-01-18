@@ -23,7 +23,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.15
-Release:        10%{?dist}
+Release:        11%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -39,6 +39,8 @@ Patch0:         freecad-3rdParty.patch
 Patch1:         freecad-0.14-Xlib_h.patch
 Patch2:         freecad-0.15-zipios.patch
 Patch3:         freecad-0.14-Version_h.patch
+# http://www.freecadweb.org/tracker/view.php?id=2347
+Patch4:         freecad-0.15-boost160.patch
 
 # Utilities
 BuildRequires:  cmake
@@ -153,6 +155,7 @@ rm -rf src/CXX
 %patch1 -p1 -b .Xlib_h
 %patch2 -p1 -b .zipios
 %patch3 -p1
+%patch4 -p1
 
 %if ! %{bundled_zipios}
 rm -rf src/zipios++
@@ -329,6 +332,9 @@ fi
 
 
 %changelog
+* Thu Jan 28 2016 Jonathan Wakely <jwakely@redhat.com> 0.15-11
+- Patched and rebuilt for Boost 1.60
+
 * Mon Jan  4 2016 Richard Shaw <hobbes1069@gmail.com> - 1:0.15-10
 - Fix appdata license, fixes BZ#1294623.
 
