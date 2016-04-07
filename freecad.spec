@@ -1,13 +1,11 @@
+%global pre 1
+
 # Maintainers:  keep this list of plugins up to date
 # List plugins in %%{_libdir}/freecad/lib, less '.so' and 'Gui.so', here
-%global plugins Complete Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part Points QtUnit Raytracing ReverseEngineering Robot Sketcher Start Web PartDesignGui _PartDesign Spreadsheet SpreadsheetGui
+%global plugins Complete Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part Points QtUnit Raytracing ReverseEngineering Robot Sketcher Start Web PartDesignGui _PartDesign Spreadsheet SpreadsheetGui DraftUtils Path PathGui area
 
 # Some plugins go in the Mod folder instead of lib. Deal with those here:
 %global mod_plugins Mod/PartDesign
-
-# This revision is 0.15 final.
-%global rev 4671
-
 
 # Some configuration options for other environments
 # rpmbuild --with=occ:  Compile using OpenCASCADE instead of OCE
@@ -22,14 +20,14 @@
 
 Name:           freecad
 Epoch:          1
-Version:        0.15
-Release:        10%{?dist}
+Version:        0.16
+Release:        0.1%{?pre:.pre}%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
 License:        GPLv2+
 URL:            http://freecadweb.org/
-Source0:        http://downloads.sourceforge.net/free-cad/%{name}_%{version}%{?rev:.%{rev}}.tar.gz
+Source0:        http://downloads.sourceforge.net/free-cad/%{name}-%{version}%{?rev:.%{rev}}%{?pre:-pre}.tar.gz
 Source101:      freecad.desktop
 Source102:      freecad.1
 Source103:      freecad.appdata.xml
@@ -58,8 +56,6 @@ BuildRequires:  mesa-libGLU-devel
 BuildRequires:  OpenCASCADE-devel
 %else
 BuildRequires:  OCE-devel
-# Temporary fix for OCE-devel not pulling in draw package
-BuildRequires:  OCE-draw
 %endif
 BuildRequires:  Coin3-devel
 BuildRequires:  python2-devel
@@ -115,14 +111,7 @@ Requires:       python-pyside
 # plugins and private shared libs in %%{_libdir}/freecad/lib are private;
 # prevent private capabilities being advertised in Provides/Requires
 %define plugin_regexp /^\\\(libFreeCAD.*%(for i in %{plugins}; do echo -n "\\\|$i\\\|$iGui"; done)\\\)\\\(\\\|Gui\\\)\\.so/d
-%{?filter_setup:
-%filter_provides_in %{_libdir}/%{name}/lib
-%filter_from_requires %{plugin_regexp}
-%filter_from_provides %{plugin_regexp}
-%filter_provides_in %{_libdir}/%{name}/Mod
-%filter_requires_in %{_libdir}/%{name}/Mod
-%filter_setup
-}
+%global __provides_exclude_from %{_libdir}/%{name}/lib/%{plugin_regexp}|%{_libdir}/%{name}/Mod/%{plugin_regexp}
 
 
 %description
@@ -144,13 +133,13 @@ Data files for FreeCAD
 
 
 %prep
-%setup -q -n freecad-%{version}%{?rev:.%{rev}}
+%setup -q -n FreeCAD-%{version}%{?rev:.%{rev}}%{?pre:-pre}
 %patch0 -p1 -b .3rdparty
 # Remove bundled pycxx if we're not using it
 %if ! %{bundled_pycxx}
 rm -rf src/CXX
 %endif
-%patch1 -p1 -b .Xlib_h
+#patch1 -p1 -b .Xlib_h
 %patch2 -p1 -b .zipios
 %patch3 -p1
 
@@ -220,10 +209,10 @@ popd
 
 # Symlink binaries to /usr/bin
 mkdir -p %{buildroot}%{_bindir}
-pushd %{buildroot}%{_bindir}
-ln -s ../%{_lib}/freecad/bin/FreeCAD .
-ln -s ../%{_lib}/freecad/bin/FreeCADCmd .
-popd
+#pushd %{buildroot}%{_bindir}
+ln -rs %{buildroot}%{_libdir}/freecad/bin/FreeCAD %{buildroot}%{_bindir}
+ln -rs %{buildroot}%{_libdir}/freecad/bin/FreeCADCmd %{buildroot}%{_bindir}
+#popd
 
 # Fix problems with unittestgui.py
 #chmod +x %{buildroot}%{_libdir}/%{name}/Mod/Test/unittestgui.py
@@ -259,6 +248,11 @@ install -pm 0644 %{SOURCE104} %{buildroot}%{_datadir}/mime/packages/%{name}.xml
 mkdir -p %{buildroot}%{_datadir}/appdata
 install -pm 0644 %{SOURCE103} %{buildroot}%{_datadir}/appdata/
 
+
+%check
+%{?fedora:appstream-util validate-relax --nonet \
+    %{buildroot}/%{_datadir}/appdata/*.appdata.xml}
+
 # Bug maintainers to keep %%{plugins} macro up to date.
 #
 # Make sure there are no plugins that need to be added to plugins macro
@@ -284,12 +278,6 @@ for p in %{plugins}; do
 done
 
 
-
-%check
-%{?fedora:appstream-util validate-relax --nonet \
-    %{buildroot}/%{_datadir}/appdata/*.appdata.xml}
-
-
 %post
 /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
 /usr/bin/update-desktop-database &> /dev/null || :
@@ -308,9 +296,8 @@ fi
 
 
 %files
-%{!?_licensedir:%global license %doc}
 %license copying.lib data/License.txt
-%doc ChangeLog.txt README
+%doc ChangeLog.txt README.md
 %exclude %{_docdir}/freecad/freecad.*
 %{_bindir}/*
 %{_datadir}/appdata/*.appdata.xml
@@ -329,6 +316,9 @@ fi
 
 
 %changelog
+* Wed Apr  6 2016 Richard Shaw <hobbes1069@gmail.com> - 1:0.16-0.1
+- Update to 0.16 prerelease.
+
 * Mon Jan  4 2016 Richard Shaw <hobbes1069@gmail.com> - 1:0.15-10
 - Fix appdata license, fixes BZ#1294623.
 
