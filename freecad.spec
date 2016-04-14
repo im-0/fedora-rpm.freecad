@@ -1,4 +1,4 @@
-%global pre 1
+#global pre 1
 
 # Maintainers:  keep this list of plugins up to date
 # List plugins in %%{_libdir}/freecad/lib, less '.so' and 'Gui.so', here
@@ -21,22 +21,21 @@
 Name:           freecad
 Epoch:          1
 Version:        0.16
-Release:        0.1%{?pre:.pre}%{?dist}
+Release:        1%{?pre:.pre}%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
 License:        GPLv2+
 URL:            http://freecadweb.org/
-Source0:        http://downloads.sourceforge.net/free-cad/%{name}-%{version}%{?rev:.%{rev}}%{?pre:-pre}.tar.gz
+Source0:        https://github.com/FreeCAD/FreeCAD/archive/%{version}%{?pre:_pre}.tar.gz#/%{name}-%{version}%{?pre:-pre}.tar.gz
 Source101:      freecad.desktop
 Source102:      freecad.1
 Source103:      freecad.appdata.xml
 Source104:      freecad.sharedmimeinfo
 
 Patch0:         freecad-3rdParty.patch
-Patch1:         freecad-0.14-Xlib_h.patch
-Patch2:         freecad-0.15-zipios.patch
-Patch3:         freecad-0.14-Version_h.patch
+Patch1:         freecad-0.15-zipios.patch
+Patch2:         freecad-0.14-Version_h.patch
 
 # Utilities
 BuildRequires:  cmake
@@ -139,9 +138,8 @@ Data files for FreeCAD
 %if ! %{bundled_pycxx}
 rm -rf src/CXX
 %endif
-#patch1 -p1 -b .Xlib_h
-%patch2 -p1 -b .zipios
-%patch3 -p1
+%patch1 -p1 -b .zipios
+%patch2 -p1
 
 %if ! %{bundled_zipios}
 rm -rf src/zipios++
@@ -316,6 +314,9 @@ fi
 
 
 %changelog
+* Wed Apr 13 2016 Richard Shaw <hobbes1069@gmail.com> - 1:0.16-1
+- Update to latest upstream release.
+
 * Wed Apr  6 2016 Richard Shaw <hobbes1069@gmail.com> - 1:0.16-0.1
 - Update to 0.16 prerelease.
 
