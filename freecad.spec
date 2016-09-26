@@ -21,7 +21,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.16
-Release:        2%{?pre:.pre}%{?dist}
+Release:        3%{?pre:.pre}%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -314,6 +314,9 @@ fi
 
 
 %changelog
+* Mon Sep 26 2016 Dominik Mierzejewski <rpm@greysector.net> - 1:0.16-3
+- rebuilt for matplotlib-2.0.0
+
 * Tue May 17 2016 Jonathan Wakely <jwakely@redhat.com> - 1:0.16-2
 - Rebuilt for linker errors in boost (#1331983)
 
