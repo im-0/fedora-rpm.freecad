@@ -21,7 +21,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.16
-Release:        5%{?pre:.pre}%{?dist}
+Release:        6%{?pre:.pre}%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -314,6 +314,9 @@ fi
 
 
 %changelog
+* Thu May 11 2017 Richard Shaw <hobbes1069@gmail.com> - 1:0.16-6
+- Rebuild for OCE 0.18.1.
+
 * Tue Feb 07 2017 Kalev Lember <klember@redhat.com> - 1:0.16-5
 - Rebuilt for Boost 1.63
 
