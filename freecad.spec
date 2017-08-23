@@ -21,7 +21,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.16
-Release:        9%{?pre:.pre}%{?dist}
+Release:        10%{?pre:.pre}%{?dist}
 Summary:        A general purpose 3D CAD modeler
 Group:          Applications/Engineering
 
@@ -106,6 +106,7 @@ Requires:       hicolor-icon-theme
 Requires:       python-matplotlib
 Requires:       python-collada
 Requires:       python-pyside
+Requires:       qt-assistant
 
 # plugins and private shared libs in %%{_libdir}/freecad/lib are private;
 # prevent private capabilities being advertised in Provides/Requires
@@ -314,6 +315,9 @@ fi
 
 
 %changelog
+* Wed Aug 23 2017 Richard Shaw <hobbes1069@gmail.com> - 1:0.16-10
+- Add qt-assistant so that help works properly.
+
 * Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1:0.16-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
