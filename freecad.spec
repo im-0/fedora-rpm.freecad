@@ -38,7 +38,7 @@ Patch1:         freecad-0.15-zipios.patch
 Patch2:         freecad-0.14-Version_h.patch
 
 # Utilities
-BuildRequires:  cmake
+BuildRequires:  cmake gcc-c++
 BuildRequires:  doxygen swig graphviz
 BuildRequires:  gcc-gfortran
 BuildRequires:  gettext
