@@ -1,11 +1,8 @@
-#global pre 1
+%global pre 1
 
 # Maintainers:  keep this list of plugins up to date
 # List plugins in %%{_libdir}/freecad/lib, less '.so' and 'Gui.so', here
-%global plugins Complete Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part Points QtUnit Raytracing ReverseEngineering Robot Sketcher Start Web PartDesignGui _PartDesign Spreadsheet SpreadsheetGui DraftUtils Path PathGui area
-
-# Some plugins go in the Mod folder instead of lib. Deal with those here:
-%global mod_plugins Mod/PartDesign
+%global plugins Complete DraftUtils Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part PartDesign Path Points QtUnit Raytracing ReverseEngineering Robot Sketcher Spreadsheet Start Web PartDesignGui _PartDesign Spreadsheet SpreadsheetGui area
 
 # Some configuration options for other environments
 # rpmbuild --with=occ:  Compile using OpenCASCADE instead of OCE
@@ -20,14 +17,13 @@
 
 Name:           freecad
 Epoch:          1
-Version:        0.16
-Release:        12%{?pre:.pre}%{?dist}
+Version:        0.17
+Release:        0.1%{?pre:.pre}%{?dist}
 Summary:        A general purpose 3D CAD modeler
-Group:          Applications/Engineering
 
 License:        GPLv2+
 URL:            http://freecadweb.org/
-Source0:        https://github.com/FreeCAD/FreeCAD/archive/%{version}%{?pre:_pre}.tar.gz#/%{name}-%{version}%{?pre:-pre}.tar.gz
+Source0:        https://github.com/FreeCAD/FreeCAD/archive/%{version}%{?pre:_pre}/FreeCAD-%{version}%{?pre:_pre}.tar.gz
 Source101:      freecad.desktop
 Source102:      freecad.1
 Source103:      freecad.appdata.xml
@@ -91,27 +87,17 @@ BuildRequires:  python-matplotlib
 BuildRequires:  libappstream-glib
 %endif
 
-# Packages separated because they are noarch, but not optional so require them
-# here.
 Requires:       %{name}-data = %{epoch}:%{version}-%{release}
-# Obsolete old doc package since it's required for functionality.
-Obsoletes:      %{name}-doc < 0.13-5
 
 # Needed for plugin support and is not a soname dependency.
 %if ! 0%{?rhel} <= 6 && "%{_arch}" != "ppc64"
 # python-pivy does not build on EPEL 6 ppc64.
-Requires:       python-pivy
+Requires:       python2-pivy
 %endif
-Requires:       hicolor-icon-theme
-Requires:       python-matplotlib
-Requires:       python-collada
-Requires:       python-pyside
+Requires:       python2-matplotlib
+Requires:       python2-collada
+Requires:       python2-pyside
 Requires:       qt-assistant
-
-# plugins and private shared libs in %%{_libdir}/freecad/lib are private;
-# prevent private capabilities being advertised in Provides/Requires
-%define plugin_regexp /^\\\(libFreeCAD.*%(for i in %{plugins}; do echo -n "\\\|$i\\\|$iGui"; done)\\\)\\\(\\\|Gui\\\)\\.so/d
-%global __provides_exclude_from %{_libdir}/%{name}/lib/%{plugin_regexp}|%{_libdir}/%{name}/Mod/%{plugin_regexp}
 
 
 %description
@@ -133,14 +119,11 @@ Data files for FreeCAD
 
 
 %prep
-%setup -q -n FreeCAD-%{version}%{?rev:.%{rev}}%{?pre:-pre}
-%patch0 -p1 -b .3rdparty
+%autosetup -p1 -n FreeCAD-%{version}%{?pre:_pre}
 # Remove bundled pycxx if we're not using it
 %if ! %{bundled_pycxx}
 rm -rf src/CXX
 %endif
-%patch1 -p1 -b .zipios
-%patch2 -p1
 
 %if ! %{bundled_zipios}
 rm -rf src/zipios++
@@ -208,7 +191,6 @@ popd
 
 # Symlink binaries to /usr/bin
 mkdir -p %{buildroot}%{_bindir}
-#pushd %{buildroot}%{_bindir}
 ln -rs %{buildroot}%{_libdir}/freecad/bin/FreeCAD %{buildroot}%{_bindir}
 ln -rs %{buildroot}%{_libdir}/freecad/bin/FreeCADCmd %{buildroot}%{_bindir}
 #popd
@@ -252,46 +234,14 @@ install -pm 0644 %{SOURCE103} %{buildroot}%{_datadir}/appdata/
 %{?fedora:appstream-util validate-relax --nonet \
     %{buildroot}/%{_datadir}/appdata/*.appdata.xml}
 
-# Bug maintainers to keep %%{plugins} macro up to date.
-#
-# Make sure there are no plugins that need to be added to plugins macro
-new_plugins=`ls %{buildroot}%{_libdir}/freecad/lib | sed -e  '%{plugin_regexp}'`
-if [ -n "$new_plugins" ]; then
-    echo -e "\n\n\n**** ERROR:\n" \
-        "\nPlugins not caught by regexp:  " $new_plugins \
-        "\n\nPlugins in %{_libdir}/freecad/lib do not exist in" \
-         "\nspecfile %%{plugins} macro.  Please add these to" \
-         "\n%%{plugins} macro at top of specfile and rebuild.\n****\n" 1>&2
-    exit 1
-fi
-# Make sure there are no entries in the plugins macro that don't match plugins
-for p in %{plugins}; do
-    if [ -z "`ls %{buildroot}%{_libdir}/freecad/lib/$p*.so`" ]; then
-        set +x
-        echo -e "\n\n\n**** ERROR:\n" \
-             "\nExtra entry in %%{plugins} macro with no matching plugin:" \
-             "'$p'.\n\nPlease remove from %%{plugins} macro at top of" \
-             "\nspecfile and rebuild.\n****\n" 1>&2
-        exit 1
-    fi
-done
-
 
 %post
-/bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
 /usr/bin/update-desktop-database &> /dev/null || :
 /usr/bin/update-mime-database %{_datadir}/mime &> /dev/null || :
 
 %postun
-if [ $1 -eq 0 ] ; then
-    /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
-    /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
-fi
 /usr/bin/update-desktop-database &> /dev/null || :
 /usr/bin/update-mime-database %{_datadir}/mime &> /dev/null || :
-
-%posttrans
-/usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %files
@@ -315,6 +265,9 @@ fi
 
 
 %changelog
+* Sat Mar 31 2018 Richard Shaw <hobbes1069@gmail.com> - 1:0.17-0.1
+- Update to 0.17 prerelease.
+
 * Wed Mar 07 2018 Adam Williamson <awilliam@redhat.com> - 1:0.16-12
 - Rebuild to fix GCC 8 mis-compilation
   See https://da.gd/YJVwk ("GCC 8 ABI change on x86_64")
