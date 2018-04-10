@@ -1,4 +1,4 @@
-%global pre 1
+#global pre 1
 
 # Maintainers:  keep this list of plugins up to date
 # List plugins in %%{_libdir}/freecad/lib, less '.so' and 'Gui.so', here
@@ -18,7 +18,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.17
-Release:        0.1%{?pre:.pre}%{?dist}
+Release:        1%{?pre:.pre}%{?dist}
 Summary:        A general purpose 3D CAD modeler
 
 License:        GPLv2+
@@ -265,6 +265,9 @@ install -pm 0644 %{SOURCE103} %{buildroot}%{_datadir}/appdata/
 
 
 %changelog
+* Tue Apr 10 2018 Richard Shaw <hobbes1069@gmail.com> - 1:0.17-1
+- Update to 0.17 release.
+
 * Sat Mar 31 2018 Richard Shaw <hobbes1069@gmail.com> - 1:0.17-0.1
 - Update to 0.17 prerelease.
 
