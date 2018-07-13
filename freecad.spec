@@ -18,7 +18,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.17
-Release:        1%{?pre:.pre}%{?dist}
+Release:        2%{?pre:.pre}%{?dist}
 Summary:        A general purpose 3D CAD modeler
 
 License:        GPLv2+
@@ -265,6 +265,9 @@ install -pm 0644 %{SOURCE103} %{buildroot}%{_datadir}/appdata/
 
 
 %changelog
+* Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1:0.17-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
 * Tue Apr 10 2018 Richard Shaw <hobbes1069@gmail.com> - 1:0.17-1
 - Update to 0.17 release.
 
