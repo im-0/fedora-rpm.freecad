@@ -12,7 +12,7 @@
 # rpmbuild --with=bundled_pycxx:  use bundled version of pycxx
 %global bundled_pycxx %{?_with_bundled_pycxx: 1} %{?!_with_bundled_pycxx: 0}
 # rpmbuild --with=bundled_smesh:  use bundled version of Salome's Mesh
-%global bundled_smesh %{?_with_bundled_smesh: 1} %{?!_with_bundled_smesh: 0}
+%global bundled_smesh %{?_with_bundled_smesh: 0} %{?!_with_bundled_smesh: 1}
 
 
 Name:           freecad
@@ -29,16 +29,19 @@ Source102:      freecad.1
 Source103:      freecad.appdata.xml
 Source104:      freecad.sharedmimeinfo
 
-Patch0:         freecad-3rdParty.patch
-Patch1:         freecad-0.15-zipios.patch
-Patch2:         freecad-0.14-Version_h.patch
+Patch0:         freecad-0.17-updates.patch
+Patch2:         freecad-0.15-zipios.patch
+Patch3:         freecad-0.14-Version_h.patch
+Patch4:         freecad-pycxx7.patch
+Patch5:         freecad-pycxx.patch
+# https://forum.freecadweb.org/viewtopic.php?f=4&t=27399&p=266487#p266382
+Patch6:         freecad-smesh_header.patch
+
 
 # Utilities
-BuildRequires:  cmake gcc-c++
+BuildRequires:  cmake gcc-c++ gettext dos2unix
 BuildRequires:  doxygen swig graphviz
 BuildRequires:  gcc-gfortran
-BuildRequires:  gettext
-BuildRequires:  dos2unix
 BuildRequires:  desktop-file-utils
 %ifnarch ppc64
 BuildRequires:  tbb-devel
@@ -53,11 +56,22 @@ BuildRequires:  OpenCASCADE-devel
 BuildRequires:  OCE-devel
 %endif
 BuildRequires:  Coin3-devel
+%if 0%{?fedora} >= 29 
+# Doesn't actually work since not everything is on python 3 yet, but...
 BuildRequires:  python2-devel
+BuildRequires:  python3-matplotlib
+%else
+BuildRequires:  python2-devel
+BuildRequires:  python2-matplotlib
+%endif
 %if 0%{?rhel} == 6
 BuildRequires:  boost148-devel
 %else
-BuildRequires:  boost-devel
+  %if 0%{?fedora} >= 29
+BuildRequires:  boost-devel boost-python2-devel
+  %else
+BuildRequires:  boost-devel boost-python-devel
+%endif
 %endif
 BuildRequires:  eigen3-devel
 BuildRequires:  qt-devel qt-webkit-devel
@@ -68,7 +82,6 @@ BuildRequires:  xerces-c xerces-c-devel
 BuildRequires:  libspnav-devel
 BuildRequires:  shiboken-devel
 BuildRequires:  python-pyside-devel pyside-tools
-#BuildRequires:  opencv-devel
 %if ! %{bundled_smesh}
 BuildRequires:  smesh-devel
 %endif
@@ -80,7 +93,10 @@ BuildRequires:  zipios++-devel
 BuildRequires:  python-pycxx-devel
 %endif
 BuildRequires:  libicu-devel
-BuildRequires:  python-matplotlib
+BuildRequires:  vtk-devel
+#BuildRequires:  openmpi-devel
+BuildRequires:  med-devel
+BuildRequires:  libkdtree++-devel
 
 # For appdata
 %if 0%{?fedora}
@@ -88,6 +104,8 @@ BuildRequires:  libappstream-glib
 %endif
 
 Requires:       %{name}-data = %{epoch}:%{version}-%{release}
+
+Provides:       bundled(smesh) = 5.1.2.2
 
 # Needed for plugin support and is not a soname dependency.
 %if ! 0%{?rhel} <= 6 && "%{_arch}" != "ppc64"
@@ -134,11 +152,10 @@ rm -rf src/zipios++
 # Fix encodings
 dos2unix -k src/Mod/Test/unittestgui.py \
             ChangeLog.txt \
-            copying.lib \
             data/License.txt
 
 # Removed bundled libraries
-rm -rf src/3rdParty
+#rm -rf src/3rdParty
 
 # Fix python suffix on epel 6
 %if 0%{?rhel} == 6
@@ -147,9 +164,10 @@ sed -i "s|-python2.7|-python2.6|g" CMakeLists.txt
 
 
 %build
-rm -rf build && mkdir build && pushd build
+mkdir build && pushd build
 
 # Deal with cmake projects that tend to link excessively.
+CXXFLAGS='-Wno-error=cast-function-type'; export CXXFLAGS
 LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
 
 %cmake -DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
@@ -157,6 +175,7 @@ LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
        -DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
        -DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
        -DRESOURCEDIR=%{_datadir}/%{name} \
+       -DOpenGL_GL_PREFERENCE=GLVND \
        -DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin3 \
        -DCOIN3D_DOC_PATH=%{_datadir}/Coin3/Coin \
        -DFREECAD_USE_EXTERNAL_PIVY=TRUE \
@@ -179,6 +198,7 @@ LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
        -DBOOST_LIBRARYDIR=%{_libdir}/boost148 \
        -DCMAKE_INSTALL_LIBDIR=%{_libdir}/freecad/lib \
 %endif
+       -DMEDFILE_INCLUDE_DIRS=%{_includedir}/med \
        ../
 
 make %{?_smp_mflags}
@@ -229,12 +249,16 @@ install -pm 0644 %{SOURCE104} %{buildroot}%{_datadir}/mime/packages/%{name}.xml
 mkdir -p %{buildroot}%{_datadir}/appdata
 install -pm 0644 %{SOURCE103} %{buildroot}%{_datadir}/appdata/
 
+# Belongs in %%license not %%doc
+rm -f %{buildroot}%{_docdir}/freecad/ThirdPartyLibraries.html
+
 
 %check
 %{?fedora:appstream-util validate-relax --nonet \
     %{buildroot}/%{_datadir}/appdata/*.appdata.xml}
 
 
+%if 0%{?epel}
 %post
 /usr/bin/update-desktop-database &> /dev/null || :
 /usr/bin/update-mime-database %{_datadir}/mime &> /dev/null || :
@@ -242,10 +266,11 @@ install -pm 0644 %{SOURCE103} %{buildroot}%{_datadir}/appdata/
 %postun
 /usr/bin/update-desktop-database &> /dev/null || :
 /usr/bin/update-mime-database %{_datadir}/mime &> /dev/null || :
+%endif
 
 
 %files
-%license copying.lib data/License.txt
+%license data/License.txt src/Doc/ThirdPartyLibraries.html
 %doc ChangeLog.txt README.md
 %exclude %{_docdir}/freecad/freecad.*
 %{_bindir}/*
@@ -256,6 +281,7 @@ install -pm 0644 %{SOURCE103} %{buildroot}%{_datadir}/appdata/
 %dir %{_libdir}/%{name}
 %{_libdir}/%{name}/bin/
 %{_libdir}/%{name}/lib/
+%{_libdir}/%{name}/Ext/
 %{_libdir}/%{name}/Mod/
 %{_mandir}/man1/*.1.gz
 
