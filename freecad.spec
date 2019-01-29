@@ -262,7 +262,7 @@ rm -f %{buildroot}%{_docdir}/freecad/ThirdPartyLibraries.html
     %{buildroot}/%{_datadir}/appdata/*.appdata.xml}
 
 
-%if 0%{?epel}
+%if 0%{?rhel} && 0%{?rhel} <= 7
 %post
 /usr/bin/update-desktop-database &> /dev/null || :
 /usr/bin/update-mime-database %{_datadir}/mime &> /dev/null || :
