@@ -28,10 +28,7 @@ Summary:        A general purpose 3D CAD modeler
 License:        GPLv2+
 URL:            http://freecadweb.org/
 Source0:        https://github.com/FreeCAD/FreeCAD/archive/%{version}%{?pre:_pre}/FreeCAD-%{version}%{?pre:_pre}.tar.gz
-Source101:      freecad.desktop
 Source102:      freecad.1
-Source103:      freecad.appdata.xml
-Source104:      freecad.sharedmimeinfo
 
 Patch2:         freecad-0.15-zipios.patch
 Patch3:         freecad-0.14-Version_h.patch
