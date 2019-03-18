@@ -21,8 +21,8 @@
 
 Name:           freecad
 Epoch:          1
-Version:        0.17
-Release:        3%{?pre:.pre}%{?dist}
+Version:        0.18
+Release:        1%{?dist}
 Summary:        A general purpose 3D CAD modeler
 
 License:        GPLv2+
@@ -33,13 +33,8 @@ Source102:      freecad.1
 Source103:      freecad.appdata.xml
 Source104:      freecad.sharedmimeinfo
 
-Patch0:         freecad-0.17-updates.patch
 Patch2:         freecad-0.15-zipios.patch
 Patch3:         freecad-0.14-Version_h.patch
-Patch4:         freecad-pycxx7.patch
-Patch5:         freecad-pycxx.patch
-# https://forum.freecadweb.org/viewtopic.php?f=4&t=27399&p=266487#p266382
-Patch6:         freecad-smesh_header.patch
 
 
 # Utilities
@@ -174,6 +169,7 @@ mkdir build && pushd build
 CXXFLAGS='-Wno-error=cast-function-type'; export CXXFLAGS
 LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
 
+#       -DCMAKE_INSTALL_LIBDIR=%{_libdir} \
 %cmake -DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
        -DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
        -DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
@@ -222,15 +218,17 @@ ln -rs %{buildroot}%{_libdir}/freecad/bin/FreeCADCmd %{buildroot}%{_bindir}
 # Fix problems with unittestgui.py
 #chmod +x %{buildroot}%{_libdir}/%{name}/Mod/Test/unittestgui.py
 
-# Install desktop file
-desktop-file-install                                   \
-    --dir=%{buildroot}%{_datadir}/applications         \
-    %{SOURCE101}
-sed -i 's,@lib@,%{_lib},g' %{buildroot}%{_datadir}/applications/%{name}.desktop
+# Move mis-installed files to the right location
+# Need to figure out if FreeCAD can install correctly at some point.
+mkdir -p %{buildroot}%{_datadir}
+mv %{buildroot}%{_libdir}/%{name}/share/* \
+   %{buildroot}%{_datadir}
+
+#sed -i 's,@lib@,%{_lib},g' %{buildroot}%{_datadir}/applications/%{name}.desktop
 
 # Install desktop icon
-install -pD -m 0644 src/Gui/Icons/%{name}.svg \
-    %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
+#install -pD -m 0644 src/Gui/Icons/%{name}.svg \
+#    %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
 
 # Install man page
 install -pD -m 0644 %{SOURCE102} \
@@ -245,21 +243,19 @@ popd
 # Remove obsolete Start_Page.html
 rm -f %{buildroot}%{_docdir}/%{name}/Start_Page.html
 
-# Install MimeType file
-mkdir -p %{buildroot}%{_datadir}/mime/packages
-install -pm 0644 %{SOURCE104} %{buildroot}%{_datadir}/mime/packages/%{name}.xml
-
 # Install appdata file
-mkdir -p %{buildroot}%{_datadir}/appdata
-install -pm 0644 %{SOURCE103} %{buildroot}%{_datadir}/appdata/
+#mkdir -p %{buildroot}%{_datadir}/appdata
+#install -pm 0644 %{SOURCE103} %{buildroot}%{_datadir}/appdata/
 
 # Belongs in %%license not %%doc
 rm -f %{buildroot}%{_docdir}/freecad/ThirdPartyLibraries.html
 
 
 %check
+desktop-file-validate \
+    %{buildroot}%{_datadir}/applications/org.freecadweb.FreeCAD.desktop
 %{?fedora:appstream-util validate-relax --nonet \
-    %{buildroot}/%{_datadir}/appdata/*.appdata.xml}
+    %{buildroot}%{_metainfodir}/*.appdata.xml}
 
 
 %if 0%{?rhel} && 0%{?rhel} <= 7
@@ -278,10 +274,10 @@ rm -f %{buildroot}%{_docdir}/freecad/ThirdPartyLibraries.html
 %doc ChangeLog.txt README.md
 %exclude %{_docdir}/freecad/freecad.*
 %{_bindir}/*
-%{_datadir}/appdata/*.appdata.xml
-%{_datadir}/applications/%{name}.desktop
-%{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
-%{_datadir}/mime/packages/%{name}.xml
+%{_metainfodir}/*.appdata.xml
+%{_datadir}/applications/*.desktop
+%{_datadir}/icons/hicolor/scalable/apps/*.svg
+%{_datadir}/mime/packages/*.xml
 %dir %{_libdir}/%{name}
 %{_libdir}/%{name}/bin/
 %{_libdir}/%{name}/lib/
@@ -295,6 +291,9 @@ rm -f %{buildroot}%{_docdir}/freecad/ThirdPartyLibraries.html
 
 
 %changelog
+* Wed Mar 13 2019 Richard Shaw <hobbes1069@gmail.com> - 1:0.18-1
+- Update to 0.18.
+
 * Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1:0.17-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
