@@ -106,10 +106,10 @@ Provides:       bundled(smesh) = 5.1.2.2
 # Needed for plugin support and is not a soname dependency.
 %if ! 0%{?rhel} <= 6 && "%{_arch}" != "ppc64"
 # python-pivy does not build on EPEL 6 ppc64.
-Requires:       python2-pivy
+Requires:       python3-pivy
 %endif
 Requires:       python2-matplotlib
-Requires:       python2-collada
+Requires:       python3-collada
 Requires:       python2-pyside
 Requires:       qt-assistant
 
