@@ -22,7 +22,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.18
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A general purpose 3D CAD modeler
 
 License:        GPLv2+
@@ -288,6 +288,9 @@ desktop-file-validate \
 
 
 %changelog
+* Sun Mar 24 2019 Richard Shaw <hobbes1069@gmail.com> - 1:0.18-2
+- Rebuild to require python3 pivy and collada.
+
 * Wed Mar 13 2019 Richard Shaw <hobbes1069@gmail.com> - 1:0.18-1
 - Update to 0.18.
 
