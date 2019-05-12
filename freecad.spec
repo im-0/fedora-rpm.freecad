@@ -13,16 +13,16 @@
 %global occ %{?_with_occ: 1} %{?!_with_occ: 0}
 # rpmbuild --with=bundled_zipios:  use bundled version of zipios++
 %global bundled_zipios %{?_with_bundled_zipios: 1} %{?!_with_bundled_zipios: 0}
-# rpmbuild --with=bundled_pycxx:  use bundled version of pycxx
-%global bundled_pycxx %{?_with_bundled_pycxx: 1} %{?!_with_bundled_pycxx: 0}
-# rpmbuild --with=bundled_smesh:  use bundled version of Salome's Mesh
+# rpmbuild --without=bundled_pycxx:  don't use bundled version of pycxx
+%global bundled_pycxx %{?_with_bundled_pycxx: 0} %{?!_with_bundled_pycxx: 1}
+# rpmbuild --without=bundled_smesh:  don't use bundled version of Salome's Mesh
 %global bundled_smesh %{?_with_bundled_smesh: 0} %{?!_with_bundled_smesh: 1}
 
 
 Name:           freecad
 Epoch:          1
-Version:        0.18
-Release:        2%{?dist}
+Version:        0.18.2
+Release:        1%{?dist}
 Summary:        A general purpose 3D CAD modeler
 
 License:        GPLv2+
@@ -52,28 +52,12 @@ BuildRequires:  OpenCASCADE-devel
 BuildRequires:  OCE-devel
 %endif
 BuildRequires:  Coin3-devel
-%if 0%{?fedora} >= 29 
-# Doesn't actually work since not everything is on python 3 yet, but...
-BuildRequires:  python2-devel
+BuildRequires:  python3-devel
 BuildRequires:  python3-matplotlib
-%else
-BuildRequires:  python2-devel
-BuildRequires:  python2-matplotlib
-%endif
-%if 0%{?rhel} == 6
-BuildRequires:  boost148-devel
-%else
-  %if 0%{?fedora} >= 29
-BuildRequires:  boost-devel boost-python2-devel
-  %else
-BuildRequires:  boost-devel boost-python-devel
-%endif
-%endif
+BuildRequires:  boost-devel boost-python3-devel
 BuildRequires:  eigen3-devel
 BuildRequires:  qt-devel qt-webkit-devel
 BuildRequires:  SoQt-devel
-# Not used yet.
-#BuildRequires:  ode-devel
 BuildRequires:  xerces-c xerces-c-devel
 BuildRequires:  libspnav-devel
 BuildRequires:  shiboken-devel
@@ -86,7 +70,7 @@ BuildRequires:  netgen-mesher-devel
 BuildRequires:  zipios++-devel
 %endif
 %if ! %{bundled_pycxx}
-BuildRequires:  python-pycxx-devel
+BuildRequires:  python3-pycxx-devel
 %endif
 BuildRequires:  libicu-devel
 BuildRequires:  vtk-devel
@@ -102,13 +86,10 @@ BuildRequires:  libappstream-glib
 Requires:       %{name}-data = %{epoch}:%{version}-%{release}
 
 Provides:       bundled(smesh) = 5.1.2.2
+Provides:       bundled(python-pycxx)
 
-# Needed for plugin support and is not a soname dependency.
-%if ! 0%{?rhel} <= 6 && "%{_arch}" != "ppc64"
-# python-pivy does not build on EPEL 6 ppc64.
 Requires:       python3-pivy
-%endif
-Requires:       python2-matplotlib
+Requires:       python3-matplotlib
 Requires:       python3-collada
 Requires:       python2-pyside
 Requires:       qt-assistant
@@ -153,11 +134,6 @@ dos2unix -k src/Mod/Test/unittestgui.py \
 # Removed bundled libraries
 #rm -rf src/3rdParty
 
-# Fix python suffix on epel 6
-%if 0%{?rhel} == 6
-sed -i "s|-python2.7|-python2.6|g" CMakeLists.txt
-%endif
-
 
 %build
 mkdir build && pushd build
@@ -172,6 +148,7 @@ LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
        -DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
        -DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
        -DRESOURCEDIR=%{_datadir}/%{name} \
+       -DPYTHON_EXECUTABLE=%{__python3} \
        -DOpenGL_GL_PREFERENCE=GLVND \
        -DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin3 \
        -DCOIN3D_DOC_PATH=%{_datadir}/Coin3/Coin \
@@ -189,11 +166,6 @@ LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
 %if ! %{bundled_pycxx}
        -DPYCXX_INCLUDE_DIR=$(pkg-config --variable=includedir PyCXX) \
        -DPYCXX_SOURCE_DIR=$(pkg-config --variable=srcdir PyCXX) \
-%endif
-%if 0%{?rhel} == 6
-       -DBOOST_INCLUDEDIR=%{_includedir}/boost148 \
-       -DBOOST_LIBRARYDIR=%{_libdir}/boost148 \
-       -DCMAKE_INSTALL_LIBDIR=%{_libdir}/freecad/lib \
 %endif
        -DMEDFILE_INCLUDE_DIRS=%{_includedir}/med \
        ../
@@ -288,6 +260,10 @@ desktop-file-validate \
 
 
 %changelog
+* Sun May 12 2019 Richard Shaw <hobbes1069@gmail.com> - 1:0.18.2-1
+- Update to 0.18.2.
+- Hopefully fix python3 issues.
+
 * Sun Mar 24 2019 Richard Shaw <hobbes1069@gmail.com> - 1:0.18-2
 - Rebuild to require python3 pivy and collada.
 
