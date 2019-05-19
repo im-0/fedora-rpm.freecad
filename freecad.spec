@@ -22,7 +22,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.18.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A general purpose 3D CAD modeler
 
 License:        GPLv2+
@@ -60,7 +60,7 @@ BuildRequires:  qt-devel qt-webkit-devel
 BuildRequires:  SoQt-devel
 BuildRequires:  xerces-c xerces-c-devel
 BuildRequires:  libspnav-devel
-BuildRequires:  shiboken-devel
+BuildRequires:  shiboken-python3-devel
 BuildRequires:  python-pyside-devel pyside-tools
 %if ! %{bundled_smesh}
 BuildRequires:  smesh-devel
@@ -91,7 +91,7 @@ Provides:       bundled(python-pycxx)
 Requires:       python3-pivy
 Requires:       python3-matplotlib
 Requires:       python3-collada
-Requires:       python2-pyside
+Requires:       python3-pyside
 Requires:       qt-assistant
 
 
@@ -142,13 +142,13 @@ mkdir build && pushd build
 CXXFLAGS='-Wno-error=cast-function-type'; export CXXFLAGS
 LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
 
-#       -DCMAKE_INSTALL_LIBDIR=%{_libdir} \
 %cmake -DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
        -DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
        -DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
        -DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
        -DRESOURCEDIR=%{_datadir}/%{name} \
        -DPYTHON_EXECUTABLE=%{__python3} \
+       -DPYTHON_SUFFIX=.cpython-37m-x86_64-linux-gnu \
        -DOpenGL_GL_PREFERENCE=GLVND \
        -DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin3 \
        -DCOIN3D_DOC_PATH=%{_datadir}/Coin3/Coin \
@@ -260,6 +260,9 @@ desktop-file-validate \
 
 
 %changelog
+* Sun May 19 2019 Richard Shaw <hobbes1069@gmail.com> - 1:0.18.2-2
+- Remove more python2 dependencies and fix shiboken building with python2.
+
 * Sun May 12 2019 Richard Shaw <hobbes1069@gmail.com> - 1:0.18.2-1
 - Update to 0.18.2.
 - Hopefully fix python3 issues.
