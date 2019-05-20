@@ -2,7 +2,8 @@
 # https://fedoraproject.org/wiki/Changes/No_more_automagic_Python_bytecompilation_phase_2
 %global _python_bytecompile_extra 1
 
-#global pre 1
+# Setup python target for shiboken so the right cmake file is imported.
+%define py_suffix %(%{__python3} -c 'import sysconfig; sysconfig.get_config_var("SOABI")')
 
 # Maintainers:  keep this list of plugins up to date
 # List plugins in %%{_libdir}/freecad/lib, less '.so' and 'Gui.so', here
@@ -138,12 +139,6 @@ dos2unix -k src/Mod/Test/unittestgui.py \
 %build
 mkdir build && pushd build
 
-# Setup python target for shiboken so the right cmake file is imported.
-%ifarch i686
-    %global py_suffix .cpython-37m-i386-linux-gnu
-%else
-    %global py_suffix .cpython-37m-%{_target}-gnu
-%endif
 
 # Deal with cmake projects that tend to link excessively.
 CXXFLAGS='-Wno-error=cast-function-type'; export CXXFLAGS
