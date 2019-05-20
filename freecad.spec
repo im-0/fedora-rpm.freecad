@@ -138,6 +138,13 @@ dos2unix -k src/Mod/Test/unittestgui.py \
 %build
 mkdir build && pushd build
 
+# Setup python target for shiboken so the right cmake file is imported.
+%ifarch i686
+    %global py_suffix .cpython-37m-i386-linux-gnu
+%else
+    %global py_suffix .cpython-37m-%{_target}-gnu
+%endif
+
 # Deal with cmake projects that tend to link excessively.
 CXXFLAGS='-Wno-error=cast-function-type'; export CXXFLAGS
 LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
@@ -148,7 +155,7 @@ LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
        -DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
        -DRESOURCEDIR=%{_datadir}/%{name} \
        -DPYTHON_EXECUTABLE=%{__python3} \
-       -DPYTHON_SUFFIX=.cpython-37m-%{_target}-gnu \
+       -DPYTHON_SUFFIX=%{py_suffix} \
        -DOpenGL_GL_PREFERENCE=GLVND \
        -DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin3 \
        -DCOIN3D_DOC_PATH=%{_datadir}/Coin3/Coin \
