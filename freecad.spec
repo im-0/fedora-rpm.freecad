@@ -3,7 +3,7 @@
 %global _python_bytecompile_extra 1
 
 # Setup python target for shiboken so the right cmake file is imported.
-%define py_suffix %(%{__python3} -c 'import sysconfig; sysconfig.get_config_var("SOABI")')
+%global py_suffix %(%{__python3} -c "import sysconfig; print(sysconfig.get_config_var('SOABI'))")
 
 # Maintainers:  keep this list of plugins up to date
 # List plugins in %%{_libdir}/freecad/lib, less '.so' and 'Gui.so', here
@@ -150,7 +150,9 @@ LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
        -DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
        -DRESOURCEDIR=%{_datadir}/%{name} \
        -DPYTHON_EXECUTABLE=%{__python3} \
-       -DPYTHON_SUFFIX=%{py_suffix} \
+%if 0%{?fedora} < 30
+       -DPYTHON_SUFFIX=.%{py_suffix} \
+%endif
        -DOpenGL_GL_PREFERENCE=GLVND \
        -DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin3 \
        -DCOIN3D_DOC_PATH=%{_datadir}/Coin3/Coin \
