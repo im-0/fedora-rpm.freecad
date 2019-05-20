@@ -23,7 +23,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.18.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        A general purpose 3D CAD modeler
 
 License:        GPLv2+
@@ -264,6 +264,9 @@ desktop-file-validate \
 
 
 %changelog
+* Mon May 20 2019 Richard Shaw <hobbes1069@gmail.com> - 1:0.18.2-3
+- Bump release so NVER is higher on f31 than f30 & f29.
+
 * Sun May 19 2019 Richard Shaw <hobbes1069@gmail.com> - 1:0.18.2-2
 - Remove more python2 dependencies and fix shiboken building with python2.
 
