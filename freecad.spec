@@ -23,7 +23,7 @@
 Name:           freecad
 Epoch:          1
 Version:        0.18.3
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        A general purpose 3D CAD modeler
 
 License:        GPLv2+
@@ -141,8 +141,8 @@ mkdir build && pushd build
 
 
 # Deal with cmake projects that tend to link excessively.
-CXXFLAGS='-Wno-error=cast-function-type'; export CXXFLAGS
-LDFLAGS='-Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
+CXXFLAGS='%{build_cxxflags} -Wno-error=cast-function-type'; export CXXFLAGS
+LDFLAGS='%{build_ldflags} -Wl,--as-needed -Wl,--no-undefined'; export LDFLAGS
 
 %cmake -DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
        -DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
@@ -264,6 +264,9 @@ desktop-file-validate \
 
 
 %changelog
+* Sat Jul 27 2019 Ivan Mironov <mironov.ivan@gmail.com> - 1:0.18.3-3
+- Build C++ code with usual CXXFLAGS (including -O2)
+
 * Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1:0.18.3-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
